@@ -1,0 +1,19 @@
+# Xcode / Swift
+build/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+.swiftpm/
+.build/
+
+# macOS
+.DS_Store
+
+# Secrets / local config — never commit Supabase keys, env files
+*.env
+.env*
+Secrets.xcconfig
+Secrets.plist
+*.local.*
