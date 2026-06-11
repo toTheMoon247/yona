@@ -27,6 +27,8 @@ create index if not exists tiles_user_id_idx on public.tiles (user_id);
 
 -- Attachments: documents stored in the Storage bucket, one row per file.
 -- user_id is denormalized so RLS / Storage policies stay join-free.
+-- RESERVED: created now but NOT used by the MVP app — document attachments are a
+-- post-MVP (v1.x) feature. Keeping the table here means v2 needs no migration.
 create table if not exists public.attachments (
   id            uuid        primary key default gen_random_uuid(),
   tile_id       uuid        not null references public.tiles(id) on delete cascade,
@@ -100,10 +102,11 @@ create policy "attachments_delete_own" on public.attachments
   for delete using (auth.uid() = user_id);
 
 -- =============================================================================
--- 5. Storage bucket + policies
+-- 5. Storage bucket + policies   (RESERVED — unused until v2 Documents)
 -- =============================================================================
 -- Private bucket; objects live at {user_id}/{tile_id}/{uuid}-{filename}.
 -- The first path segment is the owner's uid, which every policy checks.
+-- Created now so the v2 Documents feature is pure app-code with no migration.
 
 insert into storage.buckets (id, name, public)
 values ('documents', 'documents', false)

@@ -1,10 +1,12 @@
 # Yona — Implementation Plan
 
-_Phase-by-phase task breakdown. **Confirm the current phase here before starting work.** Last updated: 2026-06-10._
+_Phase-by-phase task breakdown. **Confirm the current phase here before starting work.** Last updated: 2026-06-11._
 
 Work is organized into **phases** (major capability areas) made of **slices** — each slice is a thin vertical cut that builds, runs, and is testable on its own, so the app is always in a demoable state. Milestone tags (`v0.MINOR.0`, per the Yentl convention) are cut at the end of a phase once it's verified and CI-green; `v1.0.0` is reserved for App Store launch.
 
-**Build order rationale:** get auth working, then the core tile loop (CRUD) with plain placeholders, then layer the two independent feature areas (documents, logos), then polish, then the Apple-gated work last (since it needs the paid Developer Program).
+**Scope note (2026-06-11):** **Document attachments are deferred to post-MVP (v1.x).** The MVP ships the core loop — remember an account → open its website → keep a note — with brand logos and polish. The `attachments` table and `documents` Storage bucket already exist in `supabase/schema.sql`, marked *reserved*, so v2 Documents is pure app-code work with no migration.
+
+**Build order rationale:** get auth working, then the core tile loop (CRUD) with plain placeholders, then logos, then polish, then the Apple-gated work last (since it needs the paid Developer Program).
 
 ---
 
@@ -32,7 +34,7 @@ _Milestone: **`v0.1.0 — Authentication`**._
 ---
 
 ## Phase 2 — Tile CRUD (the core loop)
-**Goal:** create, view, edit, delete, and search tiles — the heart of the app. Logos are letter-tile placeholders for now; documents come later.
+**Goal:** create, view, edit, delete, and search tiles — the heart of the app. Logos are letter-tile placeholders for now.
 
 - **Slice 1 — Read & grid.** `Tile` model + repository `fetchTiles`; `HomeScreen` 2-column grid renders the user's tiles with a **letter-tile placeholder**. All four `LoadState` states wired (loading skeleton / empty CTA / loaded / error+retry).
 - **Slice 2 — Create.** Floating "+" → `CreateTileSheet` (title, url, notes); light URL validation + `https://` auto-prepend; insert → new tile appears on Home.
@@ -44,60 +46,50 @@ _Milestone: **`v0.2.0 — Tiles`**._
 
 ---
 
-## Phase 3 — Documents & Attachments
-**Goal:** attach, store, view, and delete documents on a tile, with secure per-user Storage.
-
-- **Slice 1 — Upload.** `fileImporter` in Create/Edit (PDF, images, Word, Excel, etc.); stage files; **25 MB client-side cap** with a clear error; upload to `documents/{user_id}/{tile_id}/{uuid}-{filename}`; insert `attachments` rows.
-- **Slice 2 — View & open.** Detail attachments list (file-type icon, filename, size); tap → fetch **signed URL** → in-app **QuickLook** preview; the **📄 N docs** count shows on the Home tile.
-- **Slice 3 — Delete & cleanup.** Remove a single attachment (Storage object + row); on **tile delete**, sweep the whole `{user_id}/{tile_id}/` Storage folder (cascade only removes rows).
-
-_Milestone: **`v0.3.0 — Documents`**._
-
----
-
-## Phase 4 — Logos
-**Goal:** real brand logos on tiles, with a fallback chain that never shows a broken image.
+## Phase 3 — Logos
+**Goal:** real brand logos on tiles, with a fallback chain that never shows a broken image. After this phase the app matches the mockup visually.
 
 - **Slice 1 — Fallback foundation.** Formalize the **letter-tile generator** (first letter on a colored circle) and the **domain-extraction** helper (`https://www.netflix.com/x` → `netflix.com`), with tests.
 - **Slice 2 — Logo API.** `LogoProvider` calls the chosen API (Logo.dev / Brandfetch — _verify free-tier terms first_); resolve once at create/edit and cache `logo_url` on the tile.
 - **Slice 3 — Chain & caching.** Full fallback chain (API → apple-touch-icon → favicon → letter-tile); `AsyncImage` + `URLCache` for bytes; no re-resolve on scroll.
 
-_Milestone: **`v0.4.0 — Logos`** — the app now matches the mockup visually._
+_Milestone: **`v0.3.0 — Logos`**._
 
 ---
 
-## Phase 5 — Polish & MVP Feature-Complete
+## Phase 4 — Polish & MVP Feature-Complete
 **Goal:** make it feel like a finished product.
 
 - **Slice 1 — States & motion.** Audit every screen's loading/empty/error states; pull-to-refresh; transitions; haptics.
 - **Slice 2 — Instant home.** Lightweight `Codable` cache of the tile list so Home renders instantly on cold launch, then refreshes (still online-only for writes).
 - **Slice 3 — Identity & a11y.** App icon, launch screen, accessibility pass (Dynamic Type, VoiceOver labels), account/settings menu polish.
 
-_Milestone: **`v0.5.0 — MVP feature-complete`**._
+_Milestone: **`v0.4.0 — MVP feature-complete`**._
 
 ---
 
-## Phase 6 — Apple Sign-In & Beta (Apple-gated)
+## Phase 5 — Apple Sign-In & Beta (Apple-gated)
 **Goal:** the work that requires the paid Apple Developer Program — do it last.
 
 - **Slice 1 — Enroll & flip Apple.** Enroll in the Apple Developer Program ($99/yr); add the Sign in with Apple capability; replace the stub with real `ASAuthorizationController` sign-in; enable the Apple provider in Supabase.
 - **Slice 2 — TestFlight.** First signed build, App Store Connect setup, TestFlight beta with real users.
 
-_Milestone: **`v0.6.0 — Beta`**. `v1.0.0` reserved for App Store launch._
+_Milestone: **`v0.5.0 — Beta`**. `v1.0.0` reserved for App Store launch._
 
 ---
 
-## Out of scope (MVP) → Future / Pro
+## Post-MVP roadmap
 
-Not built in the MVP; tracked here so they're not forgotten:
+Tracked here so nothing is forgotten. Order TBD.
 
+- **Documents / Attachments (v1.x, first up).** Attach/store/view/delete files on a tile. The schema (`attachments` table + `documents` bucket) is already in place — this is pure app-code work: `fileImporter`, 25 MB client-side cap, upload to `documents/{user_id}/{tile_id}/{uuid}-{filename}`, signed-URL + QuickLook view, single-attachment delete, and a tile-delete folder sweep (cascade only removes rows). Re-adds the "N docs" indicator on Home and the attachments section on Detail.
 - **Family Vault** — share/manage tiles for family members.
-- **Reminders** — insurance/subscription renewals, passport expiration (this is what the mockup's 🔔 bell was for).
+- **Reminders** — insurance/subscription renewals, passport expiration (the mockup's 🔔 bell).
 - **Emergency Access** — trusted family members access shared info when needed.
-- Also out: categories, folders, password management, AI features, offline mode.
+- Also out of MVP: categories, folders, password management, AI features, offline mode.
 
 ---
 
 ## Status
 
-**Currently entering Phase 0 (Foundations).** Done so far (Day 1): MVP design, repo, and `supabase/schema.sql` written (not yet applied). See `project-manager-log.md` for the running journal.
+**Currently entering Phase 0 (Foundations), Slice 1.** Done so far (Day 1): MVP design, repo, and `supabase/schema.sql` written (not yet applied). See `project-manager-log.md` for the running journal.
