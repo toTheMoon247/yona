@@ -92,4 +92,4 @@ Tracked here so nothing is forgotten. Order TBD.
 
 ## Status
 
-**Currently entering Phase 0 (Foundations), Slice 1.** Done so far (Day 1): MVP design, repo, and `supabase/schema.sql` written (not yet applied). See `project-manager-log.md` for the running journal.
+**Phase 0 complete** — app builds + launches, CI green (build + SwiftLint). **Now entering Phase 1 — Backend Live & Authentication, Slice 1.** See `project-manager-log.md` for the running journal.

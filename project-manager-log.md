@@ -42,3 +42,34 @@ Repo / process:
 - **Verify the logo vendor:** check Logo.dev / Brandfetch free-tier terms and rate limits against their live docs before depending on one (open TODO in DESIGN §7).
 - **Start Step 2 of the build sequence:** scaffold the Xcode project, add `supabase-swift`, build the `LoadState` + `@Observable` store + `SupabaseRepository` skeleton, and wire **Google auth** end-to-end (Apple stubbed).
 - Adopt the Yentl conventions when the app exists: milestone `v0.MINOR.0` tags at verified, CI-green checkpoints + a `RELEASES.md`.
+
+---
+
+## Day 2 — 2026-06-11
+
+**Today.** Settled the final scope cut (deferred Documents to v2) and built **all of Phase 0** — the app compiles, launches, and is green in CI on the first run.
+
+Scope:
+
+- **Deferred document attachments to post-MVP (v1.x).** MVP is now: remember account → open website → keep a note, plus logos + polish. The `attachments` table and `documents` bucket stay in `schema.sql` but are marked *reserved*, so v2 is pure app-code. Renumbered phases (Logos → 3, Polish → 4, Apple/Beta → 5); updated DESIGN / README / plan / schema.
+
+Phase 0 — foundations (all 4 slices):
+
+- **Xcode SwiftUI app** via the wizard (`com.yona.app`, iOS 17.6 floor, Swift Testing). Xcode 26.5 uses **file-system-synchronized groups**, so new source files join the target without editing `project.pbxproj`.
+- **Supabase package (2.47.0)** linked to the target.
+- **Architecture skeleton:** `AppConfig` (Info.plist-fed, placeholder-tolerant until Phase 1), `LoadState<T>`, `SupabaseRepository`, `@Observable` `AuthStore`/`TileStore` injected via `.environment()`, `DesignTokens`, minimal `Tile` model. A Phase 0 placeholder root confirms the wiring builds + launches.
+- Committed a **shared scheme** (the wizard only makes a user scheme) so `xcodebuild`/CI can find the target.
+- **CI:** GitHub Actions — build on `macos-15` + SwiftLint, both green first try; permissive `.swiftlint.yml`.
+
+Hiccups (all resolved):
+
+- Min deployment first stayed at **26.5** (wizard default = OS version); set to iOS **17.6** in General. _(17.6 not 17.0 — lower it for wider reach at the next Xcode-closed moment.)_
+- "Add Package" added the supabase repo but didn't attach the **Supabase product** to the target → `Unable to resolve module dependency: 'Supabase'`. Fixed by adding the `Supabase` library under target → General → Frameworks.
+
+**Progress.** **Phase 0 done** — app builds + launches, CI green (build + lint), public repo. No tag (Phase 0 is pre-`v0.1.0`). No backend yet — that's Phase 1.
+
+**Steps for tomorrow.**
+
+- **Phase 1 Slice 1 — stand up Supabase:** create the project, run `supabase/schema.sql`, register `yona://auth-callback` in URL Configuration, enable the Google provider, and a manual upload test for the Storage `foldername` policy. Wire real `SUPABASE_URL`/`SUPABASE_ANON_KEY` via `Secrets.xcconfig` → Info.plist (the xcconfig→plist wiring is a Phase 1 GUI step).
+- **Phase 1 Slices 2–3 — Google sign-in** end-to-end (`AuthStore` + `AuthGate` routing), session persistence + sign-out, Apple stub button. Tag **`v0.1.0 — Authentication`** when verified + CI-green.
+- Tracked minor: lower deployment target to 17.0; bump `actions/checkout` to v5 (Node 20 deprecation).
