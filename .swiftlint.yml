@@ -1,0 +1,19 @@
+# Permissive baseline for Phase 0 — tighten as the codebase grows.
+included:
+  - Yona/Yona
+excluded:
+  - Yona/YonaTests
+  - Yona/YonaUITests
+
+disabled_rules:
+  - todo            # intentional TODO / "Phase N" markers in the skeleton
+  - trailing_comma
+
+line_length:
+  warning: 140
+  error: 200
+
+identifier_name:
+  min_length: 1     # allow short names like id, s, m in DesignTokens
+  excluded:
+    - id
