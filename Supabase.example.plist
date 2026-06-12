@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Template for the app's backend config.
+
+  Copy this to  Yona/Yona/Supabase.plist  (which is git-ignored) and fill in your
+  real values. The app bundles Supabase.plist at build time; it is never committed.
+
+      cp Supabase.example.plist Yona/Yona/Supabase.plist
+
+  - SUPABASE_URL: the BASE project URL, e.g. https://abcd1234.supabase.co
+    (no /rest/v1 suffix — the client adds it). Plain URL, no xcconfig $() trick needed.
+  - SUPABASE_ANON_KEY: the anon / publishable key (safe to ship; RLS guards data).
+    Do NOT use the service_role / secret key.
+-->
+<plist version="1.0">
+<dict>
+	<key>SUPABASE_URL</key>
+	<string>https://YOUR-REF.supabase.co</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>your-anon-or-publishable-key</string>
+</dict>
+</plist>

@@ -2,35 +2,43 @@
 //  AppConfig.swift
 //  Yona
 //
-//  Reads backend configuration from the app's Info.plist, which is fed from an
-//  (uncommitted) Secrets.xcconfig. See Secrets.example.xcconfig at the repo root.
+//  Reads backend configuration from a bundled, git-ignored `Supabase.plist`
+//  (template: Supabase.example.plist at the repo root). The file ships inside
+//  the app but is never committed — RLS is what actually guards the data.
 //
 
 import Foundation
 
 /// Static app configuration resolved once at launch.
 ///
-/// In Phase 0 there is no Supabase project yet, so when the keys are absent we
-/// fall back to a syntactically-valid placeholder URL — the Supabase client can
-/// still be constructed and the app launches. Real values arrive in Phase 1 via
-/// `Secrets.xcconfig` → Info.plist (`SUPABASE_URL`, `SUPABASE_ANON_KEY`).
+/// When `Supabase.plist` is missing or still has placeholder values (e.g. on CI,
+/// where it's git-ignored), we fall back to a syntactically-valid placeholder so
+/// the app still builds and launches; `isConfigured` is then `false`.
 struct AppConfig {
     let supabaseURL: URL
     let supabaseAnonKey: String
 
-    /// `false` until real Supabase credentials are wired in (Phase 1).
+    /// `false` until a real `Supabase.plist` is present.
     let isConfigured: Bool
 
     static let shared = AppConfig()
 
     init(bundle: Bundle = .main) {
-        let info = bundle.infoDictionary
-        let urlString = (info?["SUPABASE_URL"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let key = (info?["SUPABASE_ANON_KEY"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        var urlString = ""
+        var key = ""
+
+        if let plistURL = bundle.url(forResource: "Supabase", withExtension: "plist"),
+           let dict = NSDictionary(contentsOf: plistURL) {
+            urlString = (dict["SUPABASE_URL"] as? String) ?? ""
+            key = (dict["SUPABASE_ANON_KEY"] as? String) ?? ""
+        }
+
+        urlString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        key = key.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if !urlString.isEmpty, !key.isEmpty,
-           let url = URL(string: urlString), url.host != nil,
-           !urlString.contains("YOUR-PROJECT-REF") {
+           !urlString.contains("YOUR-REF"),
+           let url = URL(string: urlString), url.host != nil {
             supabaseURL = url
             supabaseAnonKey = key
             isConfigured = true

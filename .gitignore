@@ -16,4 +16,5 @@ xcuserdata/
 .env*
 Secrets.xcconfig
 Secrets.plist
+Supabase.plist
 *.local.*
