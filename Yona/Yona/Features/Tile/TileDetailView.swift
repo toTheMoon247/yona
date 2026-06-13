@@ -41,6 +41,7 @@ struct TileDetailView: View {
                 if tile.hasNotes {
                     notesSection(tile)
                 }
+                AttachmentsView(tileID: tile.id)
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity)

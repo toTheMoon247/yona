@@ -7,8 +7,14 @@
 //
 
 import Foundation
+import Observation
 import Supabase
 
+enum RepositoryError: Error {
+    case notSignedIn
+}
+
+@Observable
 final class SupabaseRepository {
     let client: SupabaseClient
 
@@ -71,6 +77,44 @@ final class SupabaseRepository {
             .eq("id", value: id.uuidString)
             .execute()
     }
+
+    // MARK: - Attachments
+
+    func fetchAttachments(tileID: UUID) async throws -> [Attachment] {
+        try await client
+            .from("attachments")
+            .select()
+            .eq("tile_id", value: tileID.uuidString)
+            .order("created_at", ascending: false)
+            .execute()
+            .value
+    }
+
+    /// Upload a file to Storage at `{user}/{tile}/{uuid}-{name}` and insert its row.
+    func uploadAttachment(tileID: UUID, data: Data, filename: String,
+                          contentType: String?) async throws -> Attachment {
+        guard let userID = currentUserID else { throw RepositoryError.notSignedIn }
+        // Storage RLS compares the first path folder to auth.uid() (lowercase),
+        // but Swift's UUID.uuidString is uppercase — lowercase it or uploads 403.
+        let path = "\(userID.lowercased())/\(tileID.uuidString.lowercased())/\(UUID().uuidString)-\(filename)"
+
+        try await client.storage
+            .from("documents")
+            .upload(path, data: data,
+                    options: FileOptions(contentType: contentType ?? "application/octet-stream"))
+
+        let payload = AttachmentInsertPayload(
+            tileID: tileID.uuidString, filename: filename,
+            storagePath: path, contentType: contentType, sizeBytes: data.count
+        )
+        return try await client
+            .from("attachments")
+            .insert(payload)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
 }
 
 /// Encodable body for tile insert/update. Nil fields are written as explicit
@@ -112,5 +156,21 @@ private struct TilePayload: Encodable {
         try container.encode(costPeriod, forKey: .costPeriod)
         try container.encode(renewalDate, forKey: .renewalDate)
         try container.encode(renewalRepeat, forKey: .renewalRepeat)
+    }
+}
+
+private struct AttachmentInsertPayload: Encodable {
+    let tileID: String
+    let filename: String
+    let storagePath: String
+    let contentType: String?
+    let sizeBytes: Int
+
+    enum CodingKeys: String, CodingKey {
+        case filename
+        case tileID = "tile_id"
+        case storagePath = "storage_path"
+        case contentType = "content_type"
+        case sizeBytes = "size_bytes"
     }
 }
