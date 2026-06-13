@@ -93,6 +93,25 @@ struct Tile: Identifiable, Codable, Hashable {
         return calendar.dateComponents([.day], from: today, to: target).day
     }
 
+    /// Relative phrase for the renewal date ("in 12 days", "today", "3 days ago").
+    var renewalRelative: String? {
+        guard let days = daysUntilRenewal else { return nil }
+        switch days {
+        case 0: return "today"
+        case 1: return "tomorrow"
+        case -1: return "yesterday"
+        case let future where future > 0: return "in \(future) days"
+        default: return "\(-days) days ago"
+        }
+    }
+
+    /// Full renewal display, e.g. "Jul 15, 2026 · in 12 days"; nil if unset.
+    var renewalSummary: String? {
+        guard let formattedRenewalDate else { return nil }
+        guard let relative = renewalRelative else { return formattedRenewalDate }
+        return "\(formattedRenewalDate) · \(relative)"
+    }
+
     static var currencyCode: String {
         Locale.current.currency?.identifier ?? "USD"
     }

@@ -13,6 +13,7 @@ struct HomeView: View {
     @Environment(AuthStore.self) private var auth
     @Environment(TileStore.self) private var tileStore
 
+    @AppStorage("tileSort") private var sortOption: TileSort = .recentlyAdded
     @State private var searchText = ""
     @State private var showingCreate = false
     @State private var editingTile: Tile?
@@ -33,6 +34,17 @@ struct HomeView: View {
                 .navigationTitle("Yona")
                 .searchable(text: $searchText, prompt: "Search")
                 .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Menu {
+                            Picker("Sort by", selection: $sortOption) {
+                                ForEach(TileSort.allCases) { option in
+                                    Text(option.label).tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
                             Button("Sign out", role: .destructive) {
@@ -83,7 +95,7 @@ struct HomeView: View {
             if items.isEmpty {
                 emptyState
             } else {
-                let results = filtered(items)
+                let results = sortOption.sort(filtered(items))
                 if results.isEmpty {
                     ContentUnavailableView.search(text: searchText)
                 } else {
