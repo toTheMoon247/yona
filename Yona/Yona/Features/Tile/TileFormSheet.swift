@@ -103,6 +103,7 @@ struct TileFormSheet: View {
             case let .edit(tile):
                 try await tileStore.update(id: tile.id, title: trimmedTitle, url: finalURL, notes: finalNotes)
             }
+            Haptics.success()
             dismiss()
         } catch {
             errorMessage = "Couldn't save this tile. Please try again."

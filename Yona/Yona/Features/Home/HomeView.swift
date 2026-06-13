@@ -56,7 +56,7 @@ struct HomeView: View {
                     presenting: pendingDelete
                 ) { tile in
                     Button("Delete \(tile.title)", role: .destructive) {
-                        Task { await tileStore.delete(tile) }
+                        Task { await tileStore.delete(tile); Haptics.success() }
                     }
                     Button("Cancel", role: .cancel) {}
                 } message: { tile in
@@ -69,9 +69,15 @@ struct HomeView: View {
     private var content: some View {
         switch tileStore.tiles {
         case .idle, .loading:
-            ProgressView()
-                .controlSize(.large)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: DesignTokens.Spacing.l) {
+                    ForEach(0..<6, id: \.self) { _ in
+                        TileCardSkeleton()
+                    }
+                }
+                .padding(DesignTokens.Spacing.l)
+            }
+            .disabled(true)
 
         case let .loaded(items):
             if items.isEmpty {
@@ -102,6 +108,7 @@ struct HomeView: View {
                 }
             }
             .padding(DesignTokens.Spacing.l)
+            .animation(.snappy, value: items)
         }
         .refreshable { await tileStore.load() }
     }

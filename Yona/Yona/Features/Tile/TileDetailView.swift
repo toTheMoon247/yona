@@ -102,6 +102,7 @@ struct TileDetailView: View {
             Button("Delete", role: .destructive) {
                 Task {
                     await tileStore.delete(tile)
+                    Haptics.success()
                     dismiss()
                 }
             }
