@@ -40,125 +40,21 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 
 ---
 
-## Day 3 — 2026-06-13
+## Day 3 — 2026-06-12
 
-**Today.** Got login fully working — you can now sign into Yona with Google.
+**Today.** A marathon session — took Yona from "just foundations" all the way to a full-featured app running on a real iPhone. (It ran late, past midnight, but it's all one session.)
 
-- **Connected the app to our cloud and to Google.** Set up the live database, turned on "Sign in with Google," and linked it all to the app.
-- **Sign-in works start to finish.** Tapping "Continue with Google," approving in Google, and landing back in the app signed-in all works — tested on the simulator. (Hit one snag — the login was bouncing to the wrong page afterward — and fixed it.)
-- **It remembers you.** Close and reopen the app and you're still signed in; signing out takes you back to the login screen. "Sign in with Apple" is shown but switched off until we join Apple's paid program later.
-- **Saved a first official version.** Marked this as our first milestone — a safe point we can always return to.
+- **Login works.** Set up the live cloud backend and got "Sign in with Google" working end to end, with the session remembered across launches. (Saved our first official version.)
+- **The core app.** Built the home screen of account "tiles" — add, view, edit, delete, and search your accounts.
+- **Real logos.** Each account shows its real brand logo (Netflix, Spotify, and so on), with a clean colored-letter fallback when one isn't found.
+- **Polish + on a real phone.** Smoothed the loading and empty screens, added animations and the app icon, and installed Yona onto an actual iPhone to carry around and use for real.
+- **Cost tracking.** Give any account an optional monthly/yearly cost; the home screen shows an estimated monthly total.
+- **Renewal dates.** Accounts can have a renewal date that repeats (monthly/yearly) and always shows the *next* one; sort the home screen by what's due soonest.
+- **Search to add.** Instead of pasting a web address, type a brand name (e.g. "Netflix"), pick it from a list, and the name, link, and logo fill in automatically.
+- **Cleaner add flow.** Adding an account is now two simple steps — pick the service, then add the optional details.
+- **Document attachments.** Attach files to an account (insurance PDFs, statements…), open them in-app, and delete them; deleting an account cleans up its files too.
+- **Saved several milestone versions** along the way, up to the Documents release.
 
-**Where we are.** The app now has real, working login backed by the cloud. Next we build the actual content.
+**Where we are.** Yona is now a genuinely full-featured personal vault, running on a real phone: search-to-add accounts, real logos, costs, recurring renewal dates, sorting, and secure document storage. Everything that doesn't need an Apple developer account is built.
 
-**Next steps (next day).** Start building the heart of the app: creating, viewing, editing, and deleting your account "tiles," and the home screen grid that shows them.
-
----
-
-## Day 4 — 2026-06-13
-
-**Today.** Built the heart of the app — you can now add and manage your accounts.
-
-- **The home screen of tiles is live.** Your saved accounts show as a grid of cards, each with a colored placeholder logo and a little marker when it has a note.
-- **Full add / open / edit / delete.** Tap "+" to add an account (name, website, optional note); tap a tile to see it and open its website inside the app; edit or delete any tile.
-- **Search.** A search bar finds tiles by name or web address as you type, ignoring capital letters and accents.
-- **Fixed a small bug** where clearing a note didn't stick — now it does.
-- **Saved another official version** — our second milestone.
-
-**Where we are.** The app is genuinely usable now: sign in and keep all your important accounts in one place. The logos are still simple letter placeholders.
-
-**Next steps (next day).** Make it look polished by fetching the real brand logos (the Netflix "N," the Spotify circle, and so on) instead of the letter placeholders.
-
----
-
-## Day 5 — 2026-06-13
-
-**Today.** Replaced the plain letter placeholders with real brand logos.
-
-- **Real logos.** Each account now shows its actual brand logo (Netflix's "N," Spotify's circle, Dropbox's box, and so on) instead of a colored letter.
-- **Graceful fallback.** If a brand isn't recognized, the tile keeps its colored letter — so there's never a broken or blank logo.
-- **Fast.** Logos are saved on the device after the first load, so they appear instantly next time.
-- **Tidied up.** Removed an old leftover settings file we no longer use.
-- **Saved another official version** — our third milestone.
-
-**Where we are.** The app now looks the part — it matches the original mockup. Sign in, add accounts, and see real logos, all working.
-
-**Next steps (next day).** A polish pass — smooth out the loading and empty screens, add an app icon, and improve accessibility — to get it feeling fully finished.
-
----
-
-## Day 6 — 2026-06-13
-
-**Today.** A polish pass — the app is now feature-complete for its first version.
-
-- **Smoother and snappier.** Added a gentle loading placeholder, smooth animations when tiles are added or removed, and a success buzz (on a real phone) when you save or delete.
-- **Instant open.** The app now remembers your accounts on the device, so it opens straight to your grid instead of loading from scratch — and it still shows them even with no internet.
-- **App icon.** Yona now has its own icon — the clean blue grid that matches the logo inside the app.
-- **Easier for everyone.** Improved support for VoiceOver (the screen reader) so the app is more accessible.
-- **Saved our feature-complete version** — everything planned for the first release is now built.
-
-**Where we are.** The app is done in terms of features: sign in, keep your accounts with real logos, search, all in a polished, fast experience.
-
-**Next steps (next day).** The final stretch — set up Apple sign-in and get the app onto TestFlight so real people can try it. This is the part that needs the paid Apple developer account.
-
----
-
-## Day 7 — 2026-06-13
-
-**Today.** Put the app on a real iPhone, polished it from there, and added cost tracking.
-
-- **On a real phone.** Installed Yona on the device and used it for real, which surfaced a bunch of small refinements.
-- **Nicer logos and tiles.** Logos now appear instantly (no flicker), fill the tile, and sit cleanly without a white ring; tiles are bigger and less cluttered.
-- **Modern actions.** Long-press a tile for Edit/Delete (the little three-dot button is gone).
-- **Cost tracking (new).** You can add an optional monthly or yearly cost to any account, and the home screen shows your estimated monthly total.
-- **Creation date.** Each tile shows when it was created, at the bottom of its detail screen.
-- **Saved a checkpoint** capturing all of the above.
-
-**Where we are.** A polished app running on a real phone, now with cost tracking. Still pre-beta.
-
-**Next steps (next day).** A small code tidy-up, then the final stretch — Apple sign-in + TestFlight once the Apple developer account is sorted.
-
----
-
-## Day 8 — 2026-06-13
-
-**Today.** Started the Apple developer account, tidied the code, and added renewal-date tracking.
-
-- **Apple account.** Enrolled in Apple's (paid) developer program — the one needed for TestFlight and the App Store. Submitted; **pending approval**. Also got the app running on a real iPhone for free in the meantime.
-- **Tidied the code.** A behind-the-scenes cleanup so the project stays neat and future features are easier to add — no change to how the app works.
-- **Renewal dates (new).** Any account can now have an optional renewal/due date. The home screen can sort by it (so upcoming renewals float to the top), and each tile shows "Renews <date> · in N days." Together with the cost field, Yona is now a handy little subscription tracker.
-- **Saved a checkpoint** capturing the renewal-date work.
-
-**Where we are.** A polished app on a real phone that tracks your accounts, their costs, and their renewal dates. Apple approval is pending.
-
-**Next steps.** Once Apple approves: turn on "Sign in with Apple" and get the app onto TestFlight. (Reminders and document attachments are planned but parked for now.)
-
----
-
-## Day 9 — 2026-06-13
-
-**Today.** Made adding accounts much smoother and made renewals smarter.
-
-- **Search to add.** Instead of pasting a web address, you can now search a service by name (e.g. "Netflix"), pick it from a list, and the name, link, and logo fill in automatically. Manual entry is still there for anything not found.
-- **Two-step add.** Adding an account is now two clean steps — first pick the service, then add the optional details (notes, cost, renewal) — so it's less cluttered and more natural.
-- **Smarter renewals.** Renewal dates can now repeat (monthly/yearly) and always show the *next* upcoming date automatically, so they never go stale. Added quick "+1 month / +1 year" buttons with a little tap feedback.
-- **Saved a checkpoint.**
-
-**Where we are.** Yona is a polished subscription/account tracker on a real phone — easy to add to, with costs and recurring renewal dates. Apple approval still pending.
-
-**Next steps.** Once Apple approves: Apple sign-in + TestFlight. (Reminders and document attachments still parked.)
-
----
-
-## Day 10 — 2026-06-14
-
-**Today.** Added document attachments — the last big feature that didn't need Apple.
-
-- **Attach files to an account.** Open any account and attach documents to it (insurance PDFs, statements, contracts…), up to 25 MB each.
-- **View them in the app.** Tap a document and it opens full-screen to read, with a share button.
-- **Remove them.** Long-press a document to delete it; deleting an account also cleans up its files.
-- **Saved a new milestone version** — a bigger checkpoint capping all the recent feature work.
-
-**Where we are.** Yona is now a full-featured personal vault: search-to-add accounts, costs, recurring renewal dates, sorting, and document storage — all on a real phone. The only thing left before sharing it with others is the Apple side.
-
-**Next task (next day): the cost breakdown screen.** Tap the monthly total on the home screen to open a screen that lists every account with a cost, shows what each one costs per month, and the running total — so you can see exactly where the spend goes. (Apple sign-in + TestFlight is still waiting on the developer-account approval.)
+**Next task (next day): the cost breakdown screen.** Tap the monthly total on the home screen to open a screen that lists every account with a cost, shows what each costs per month, and the running total — so you can see exactly where the spend goes. (Apple sign-in + TestFlight is still waiting on the developer-account approval.)

@@ -4,7 +4,7 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
-## v0.5.0 — Documents · 2026-06-14
+## v0.5.0 — Documents · 2026-06-12
 
 Attach documents to a tile — and the cap on a big run of post-MVP features.
 
@@ -18,7 +18,7 @@ Attach documents to a tile — and the cap on a big run of post-MVP features.
 Every roadmap feature that doesn't need the Apple Developer account is now built.
 Remaining: Apple Sign-In + TestFlight (now targeted at `v0.6.0`).
 
-## v0.4.3 — Smart add & recurring renewals · 2026-06-13
+## v0.4.3 — Smart add & recurring renewals · 2026-06-12
 
 - **Service search:** type a brand name → pick from results (logo + name + domain)
   → title / URL / logo auto-fill (Brandfetch Brand Search). Manual entry remains.
@@ -29,7 +29,7 @@ Remaining: Apple Sign-In + TestFlight (now targeted at `v0.6.0`).
   +1 year quick chips (with a light haptic); smart default from the cost period.
   (Migration `0003_renewal_repeat.sql`.)
 
-## v0.4.2 — Renewal dates · 2026-06-13
+## v0.4.2 — Renewal dates · 2026-06-12
 
 Phase 6: an optional renewal/due date per tile (with cost tracking, Yona is now
 a lightweight subscription tracker).
@@ -39,7 +39,7 @@ a lightweight subscription tracker).
 - Home **sort menu**: recently added / due date / name / cost (persisted).
 - Plus an internal cleanup (TileDraft + detail-view split) — lint clean.
 
-## v0.4.1 — Polish & cost tracking · 2026-06-13
+## v0.4.1 — Polish & cost tracking · 2026-06-12
 
 Post-MVP refinements (mostly from using it on a real device) plus a new feature.
 
@@ -52,7 +52,7 @@ Post-MVP refinements (mostly from using it on a real device) plus a new feature.
 - **"Tile created <date>"** pinned at the bottom of the detail screen.
 - Roadmap captured in `docs/roadmap.md`; SwiftLint CI fix.
 
-## v0.4.0 — MVP feature-complete · 2026-06-13
+## v0.4.0 — MVP feature-complete · 2026-06-12
 
 Polish pass — every feature in the MVP scope is now built.
 
@@ -65,7 +65,7 @@ Polish pass — every feature in the MVP scope is now built.
 Built so far: auth, tile CRUD + search, logos, polish. Remaining before the App
 Store: Apple Sign-In + TestFlight (Phase 5, needs Apple Developer enrollment).
 
-## v0.3.0 — Logos · 2026-06-13
+## v0.3.0 — Logos · 2026-06-12
 
 Real brand logos replace the letter-tile placeholders.
 
@@ -76,7 +76,7 @@ Real brand logos replace the letter-tile placeholders.
 - **Domain extraction** (host minus `www`) as the lookup key, with unit tests.
 - Config: `BRANDFETCH_CLIENT_ID` read from the git-ignored `Supabase.plist`.
 
-## v0.2.0 — Tiles · 2026-06-13
+## v0.2.0 — Tiles · 2026-06-12
 
 The core of the app: users can manage their account tiles.
 
@@ -87,7 +87,7 @@ The core of the app: users can manage their account tiles.
 
 Logos are still letter-tile placeholders — real brand logos arrive in Phase 3.
 
-## v0.1.0 — Authentication · 2026-06-13
+## v0.1.0 — Authentication · 2026-06-12
 
 First working slice: users can sign in.
 

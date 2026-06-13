@@ -95,7 +95,7 @@ Local notifications (no server / no APNs — **not gated on the paid Apple progr
 ### Phase 8 — Document Attachments  _(✅ complete — v0.5.0)_
 **Goal:** attach/view/delete documents on a tile, managed on the **Detail** screen.
 
-**Storage decision (2026-06-14):** **Supabase Storage, baseline** — private bucket
+**Storage decision (2026-06-12):** **Supabase Storage, baseline** — private bucket
 + RLS + provider-side at-rest encryption. *Not* iCloud, *not* client-side/E2E
 encryption (the crypto is cheap but key-management + no-recovery UX isn't worth it
 now, and E2E would make Family Vault sharing hard). Revisit only if "even we can't
