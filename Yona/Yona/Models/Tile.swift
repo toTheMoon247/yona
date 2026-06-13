@@ -12,6 +12,11 @@ enum CostPeriod: String, Codable, CaseIterable, Hashable {
     case yearly
 }
 
+enum RenewalRepeat: String, Codable, CaseIterable, Hashable {
+    case monthly
+    case yearly
+}
+
 struct Tile: Identifiable, Codable, Hashable {
     let id: UUID
     var title: String
@@ -21,6 +26,7 @@ struct Tile: Identifiable, Codable, Hashable {
     var costAmount: Double?
     var costPeriod: CostPeriod?
     var renewalDate: Date?
+    var renewalRepeat: RenewalRepeat?
     let createdAt: Date
     let updatedAt: Date
 
@@ -30,6 +36,7 @@ struct Tile: Identifiable, Codable, Hashable {
         case costAmount = "cost_amount"
         case costPeriod = "cost_period"
         case renewalDate = "renewal_date"
+        case renewalRepeat = "renewal_repeat"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -42,6 +49,7 @@ struct Tile: Identifiable, Codable, Hashable {
         logoURL = try container.decodeIfPresent(String.self, forKey: .logoURL)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         costPeriod = try container.decodeIfPresent(CostPeriod.self, forKey: .costPeriod)
+        renewalRepeat = try container.decodeIfPresent(RenewalRepeat.self, forKey: .renewalRepeat)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         // `numeric` may arrive as a JSON number or a string depending on the backend.
@@ -79,21 +87,31 @@ struct Tile: Identifiable, Codable, Hashable {
         return "\(amount) / \(costPeriod == .monthly ? "month" : "year")"
     }
 
-    /// Display string for the renewal date (locale-formatted), or nil.
-    var formattedRenewalDate: String? {
-        renewalDate.map { $0.formatted(date: .abbreviated, time: .omitted) }
-    }
-
-    /// Whole days from today until the renewal date (negative if past); nil if unset.
-    var daysUntilRenewal: Int? {
+    /// The next upcoming renewal: a repeating anchor rolled forward to today or
+    /// later, or the plain date for a one-time renewal. Nil if unset.
+    var nextRenewal: Date? {
         guard let renewalDate else { return nil }
+        guard let renewalRepeat else { return renewalDate }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let target = calendar.startOfDay(for: renewalDate)
-        return calendar.dateComponents([.day], from: today, to: target).day
+        var date = calendar.startOfDay(for: renewalDate)
+        let component: Calendar.Component = renewalRepeat == .monthly ? .month : .year
+        while date < today {
+            guard let next = calendar.date(byAdding: component, value: 1, to: date) else { break }
+            date = next
+        }
+        return date
     }
 
-    /// Relative phrase for the renewal date ("in 12 days", "today", "3 days ago").
+    /// Whole days from today until the next renewal (negative if past); nil if unset.
+    var daysUntilRenewal: Int? {
+        guard let next = nextRenewal else { return nil }
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: next)).day
+    }
+
+    /// Relative phrase for the next renewal ("in 12 days", "today", "3 days ago").
     var renewalRelative: String? {
         guard let days = daysUntilRenewal else { return nil }
         switch days {
@@ -105,11 +123,12 @@ struct Tile: Identifiable, Codable, Hashable {
         }
     }
 
-    /// Full renewal display, e.g. "Jul 15, 2026 · in 12 days"; nil if unset.
+    /// Next renewal display, e.g. "Jul 15, 2026 · in 12 days"; nil if unset.
     var renewalSummary: String? {
-        guard let formattedRenewalDate else { return nil }
-        guard let relative = renewalRelative else { return formattedRenewalDate }
-        return "\(formattedRenewalDate) · \(relative)"
+        guard let next = nextRenewal else { return nil }
+        let date = next.formatted(date: .abbreviated, time: .omitted)
+        guard let relative = renewalRelative else { return date }
+        return "\(date) · \(relative)"
     }
 
     static var currencyCode: String {

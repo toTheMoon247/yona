@@ -14,6 +14,7 @@ struct TileExtraFieldsView: View {
     @Binding var costPeriod: CostPeriod
     @Binding var hasRenewalDate: Bool
     @Binding var renewalDate: Date
+    @Binding var renewalRepeat: RenewalRepeat?
 
     var body: some View {
         Section("Notes (optional)") {
@@ -33,11 +34,47 @@ struct TileExtraFieldsView: View {
             }
             .pickerStyle(.segmented)
         }
+        renewalSection
+    }
+
+    private var renewalSection: some View {
         Section("Renewal date (optional)") {
             Toggle("Set a renewal date", isOn: $hasRenewalDate)
+                .onChange(of: hasRenewalDate) { _, isOn in
+                    applyRepeatDefault(isOn: isOn)
+                }
             if hasRenewalDate {
+                HStack {
+                    Button("Today") { setRenewal(months: 0, years: 0) }
+                    Button("+1 month") { setRenewal(months: 1, years: 0) }
+                    Button("+1 year") { setRenewal(months: 0, years: 1) }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
                 DatePicker("Renews on", selection: $renewalDate, displayedComponents: .date)
+
+                Picker("Repeats", selection: $renewalRepeat) {
+                    Text("Never").tag(RenewalRepeat?.none)
+                    Text("Monthly").tag(RenewalRepeat?.some(.monthly))
+                    Text("Yearly").tag(RenewalRepeat?.some(.yearly))
+                }
             }
         }
+    }
+
+    private func setRenewal(months: Int, years: Int) {
+        let calendar = Calendar.current
+        var date = Date()
+        if months != 0 { date = calendar.date(byAdding: .month, value: months, to: date) ?? date }
+        if years != 0 { date = calendar.date(byAdding: .year, value: years, to: date) ?? date }
+        renewalDate = date
+    }
+
+    /// When the renewal date is switched on and a cost is set, default "Repeats" to match it.
+    private func applyRepeatDefault(isOn: Bool) {
+        guard isOn, renewalRepeat == nil,
+              !costText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        renewalRepeat = costPeriod == .monthly ? .monthly : .yearly
     }
 }

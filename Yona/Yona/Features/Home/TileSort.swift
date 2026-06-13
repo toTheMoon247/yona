@@ -40,7 +40,7 @@ enum TileSort: String, CaseIterable, Identifiable {
 
     /// Soonest renewal first; tiles without a date go last (then most recent).
     private static func byDueDate(_ lhs: Tile, _ rhs: Tile) -> Bool {
-        switch (lhs.renewalDate, rhs.renewalDate) {
+        switch (lhs.nextRenewal, rhs.nextRenewal) {
         case let (left?, right?): return left < right
         case (_?, nil): return true
         case (nil, _?): return false

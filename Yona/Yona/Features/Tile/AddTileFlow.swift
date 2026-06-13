@@ -20,6 +20,7 @@ struct AddTileFlow: View {
     @State private var costPeriod: CostPeriod = .monthly
     @State private var hasRenewalDate = false
     @State private var renewalDate = Date()
+    @State private var renewalRepeat: RenewalRepeat?
 
     @State private var showDetails = false
     @State private var isSaving = false
@@ -86,7 +87,8 @@ struct AddTileFlow: View {
                 costText: $costText,
                 costPeriod: $costPeriod,
                 hasRenewalDate: $hasRenewalDate,
-                renewalDate: $renewalDate
+                renewalDate: $renewalDate,
+                renewalRepeat: $renewalRepeat
             )
             if let errorMessage {
                 Section { Text(errorMessage).foregroundStyle(.red) }
@@ -125,7 +127,8 @@ struct AddTileFlow: View {
             notes: cleanNotes.isEmpty ? nil : cleanNotes,
             costAmount: amount,
             costPeriod: period,
-            renewalDate: hasRenewalDate ? renewalDate : nil
+            renewalDate: hasRenewalDate ? renewalDate : nil,
+            renewalRepeat: hasRenewalDate ? renewalRepeat : nil
         )
 
         do {

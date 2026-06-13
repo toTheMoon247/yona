@@ -22,6 +22,7 @@ create table if not exists public.tiles (
   cost_amount numeric(12,2),                          -- optional cost tracking
   cost_period text check (cost_period in ('monthly', 'yearly')),
   renewal_date date,                                  -- optional renewal/due date
+  renewal_repeat text check (renewal_repeat in ('monthly', 'yearly')), -- null = one-time
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );

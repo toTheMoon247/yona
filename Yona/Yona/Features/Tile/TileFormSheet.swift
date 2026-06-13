@@ -21,6 +21,7 @@ struct TileFormSheet: View {
     @State private var costPeriod: CostPeriod
     @State private var hasRenewalDate: Bool
     @State private var renewalDate: Date
+    @State private var renewalRepeat: RenewalRepeat?
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -35,6 +36,7 @@ struct TileFormSheet: View {
         _costPeriod = State(initialValue: tile.costPeriod ?? .monthly)
         _hasRenewalDate = State(initialValue: tile.renewalDate != nil)
         _renewalDate = State(initialValue: tile.renewalDate ?? Date())
+        _renewalRepeat = State(initialValue: tile.renewalRepeat)
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -56,7 +58,8 @@ struct TileFormSheet: View {
                     costText: $costText,
                     costPeriod: $costPeriod,
                     hasRenewalDate: $hasRenewalDate,
-                    renewalDate: $renewalDate
+                    renewalDate: $renewalDate,
+                    renewalRepeat: $renewalRepeat
                 )
                 if let errorMessage {
                     Section { Text(errorMessage).foregroundStyle(.red) }
@@ -93,7 +96,8 @@ struct TileFormSheet: View {
             notes: cleanNotes.isEmpty ? nil : cleanNotes,
             costAmount: amount,
             costPeriod: period,
-            renewalDate: hasRenewalDate ? renewalDate : nil
+            renewalDate: hasRenewalDate ? renewalDate : nil,
+            renewalRepeat: hasRenewalDate ? renewalRepeat : nil
         )
 
         do {
