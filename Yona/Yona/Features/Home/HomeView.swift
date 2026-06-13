@@ -3,8 +3,8 @@
 //  Yona
 //
 //  The signed-in home: a 2-column grid of the user's tiles with loading / empty
-//  / error states, the floating "+" to add a tile, and a per-tile ••• menu for
-//  edit / delete. Search lands in Slice 5.
+//  / error / no-results states, a search bar (title + URL), the floating "+",
+//  and a per-tile ••• menu for edit / delete.
 //
 
 import SwiftUI
@@ -13,6 +13,7 @@ struct HomeView: View {
     @Environment(AuthStore.self) private var auth
     @Environment(TileStore.self) private var tileStore
 
+    @State private var searchText = ""
     @State private var showingCreate = false
     @State private var editingTile: Tile?
     @State private var pendingDelete: Tile?
@@ -30,6 +31,7 @@ struct HomeView: View {
                     TileDetailView(tileID: tile.id)
                 }
                 .navigationTitle("Yona")
+                .searchable(text: $searchText, prompt: "Search")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
@@ -75,7 +77,12 @@ struct HomeView: View {
             if items.isEmpty {
                 emptyState
             } else {
-                grid(items)
+                let results = filtered(items)
+                if results.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
+                } else {
+                    grid(results)
+                }
             }
 
         case .failed:
@@ -97,6 +104,17 @@ struct HomeView: View {
             .padding(DesignTokens.Spacing.l)
         }
         .refreshable { await tileStore.load() }
+    }
+
+    /// Case- and diacritic-insensitive filter on title + URL.
+    private func filtered(_ items: [Tile]) -> [Tile] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return items }
+        let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+        return items.filter { tile in
+            tile.title.range(of: query, options: options) != nil
+                || tile.url.range(of: query, options: options) != nil
+        }
     }
 
     private func tileMenu(_ tile: Tile) -> some View {
