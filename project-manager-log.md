@@ -100,3 +100,20 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The app is done in terms of features: sign in, keep your accounts with real logos, search, all in a polished, fast experience.
 
 **Next steps (next day).** The final stretch — set up Apple sign-in and get the app onto TestFlight so real people can try it. This is the part that needs the paid Apple developer account.
+
+---
+
+## Day 7 — 2026-06-13
+
+**Today.** Put the app on a real iPhone, polished it from there, and added cost tracking.
+
+- **On a real phone.** Installed Yona on the device and used it for real, which surfaced a bunch of small refinements.
+- **Nicer logos and tiles.** Logos now appear instantly (no flicker), fill the tile, and sit cleanly without a white ring; tiles are bigger and less cluttered.
+- **Modern actions.** Long-press a tile for Edit/Delete (the little three-dot button is gone).
+- **Cost tracking (new).** You can add an optional monthly or yearly cost to any account, and the home screen shows your estimated monthly total.
+- **Creation date.** Each tile shows when it was created, at the bottom of its detail screen.
+- **Saved a checkpoint** capturing all of the above.
+
+**Where we are.** A polished app running on a real phone, now with cost tracking. Still pre-beta.
+
+**Next steps (next day).** A small code tidy-up, then the final stretch — Apple sign-in + TestFlight once the Apple developer account is sorted.

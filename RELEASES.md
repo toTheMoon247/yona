@@ -4,6 +4,19 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.4.1 — Polish & cost tracking · 2026-06-13
+
+Post-MVP refinements (mostly from using it on a real device) plus a new feature.
+
+- **Cost tracking:** optional per-tile cost (amount + monthly/yearly) with an
+  estimated monthly total on Home. (DB migration `0001_cost_tracking.sql`.)
+- **Tile redesign:** large logos that fill the tile, title beneath, no in-tile clutter.
+- **Logos:** instant (no flash) via an explicit loader + in-memory cache; fill the
+  circle directly (no white backing).
+- **Long-press context menu** for Edit/Delete (replaces the ••• button).
+- **"Tile created <date>"** pinned at the bottom of the detail screen.
+- Roadmap captured in `docs/roadmap.md`; SwiftLint CI fix.
+
 ## v0.4.0 — MVP feature-complete · 2026-06-13
 
 Polish pass — every feature in the MVP scope is now built.
