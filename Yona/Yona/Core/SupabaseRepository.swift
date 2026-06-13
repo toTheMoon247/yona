@@ -23,6 +23,11 @@ final class SupabaseRepository {
         )
     }
 
+    /// The signed-in user's id (for per-user caching), or nil when signed out.
+    var currentUserID: String? {
+        client.auth.currentUser?.id.uuidString
+    }
+
     // MARK: - Tiles
 
     /// Fetch the signed-in user's tiles, newest first. RLS scopes this to the caller.

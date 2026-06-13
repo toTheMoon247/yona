@@ -2,8 +2,9 @@
 //  TileStore.swift
 //  Yona
 //
-//  Owns the tile list for the UI. Slice 1: load + render. Create/update/delete
-//  arrive in later Phase 2 slices.
+//  Owns the tile list for the UI: load (cache-first, then network), create,
+//  update, delete. Mutations keep an on-disk per-user cache in sync so the grid
+//  appears instantly on the next cold launch.
 //
 
 import Foundation
@@ -15,21 +16,30 @@ final class TileStore {
     private(set) var tiles: LoadState<[Tile]> = .idle
 
     private let repository: SupabaseRepository
+    private let cache = TileCache()
 
     init(repository: SupabaseRepository) {
         self.repository = repository
     }
 
-    /// Load the user's tiles. Shows a spinner only on the first load; a refresh
-    /// keeps the current list visible (pull-to-refresh has its own indicator).
+    /// Show cached tiles instantly (first load), then refresh from the network.
+    /// On a network failure we keep whatever's already shown rather than blanking.
     func load() async {
         if tiles.value == nil {
-            tiles = .loading
+            if let userID = repository.currentUserID, let cached = cache.load(userID: userID) {
+                tiles = .loaded(cached)
+            } else {
+                tiles = .loading
+            }
         }
         do {
-            tiles = .loaded(try await repository.fetchTiles())
+            let fresh = try await repository.fetchTiles()
+            tiles = .loaded(fresh)
+            persistCache()
         } catch {
-            tiles = .failed(error)
+            if tiles.value == nil {
+                tiles = .failed(error)
+            }
         }
     }
 
@@ -40,6 +50,7 @@ final class TileStore {
         var current = tiles.value ?? []
         current.insert(tile, at: 0)
         tiles = .loaded(current)
+        persistCache()
     }
 
     /// Update a tile in place. Throws so the form can surface the failure.
@@ -49,6 +60,7 @@ final class TileStore {
               let index = current.firstIndex(where: { $0.id == id }) else { return }
         current[index] = updated
         tiles = .loaded(current)
+        persistCache()
     }
 
     /// Delete a tile. On failure the tile stays in the list so the user can retry.
@@ -58,8 +70,14 @@ final class TileStore {
             guard var current = tiles.value else { return }
             current.removeAll { $0.id == tile.id }
             tiles = .loaded(current)
+            persistCache()
         } catch {
             // Keep the tile on failure.
         }
+    }
+
+    private func persistCache() {
+        guard let userID = repository.currentUserID, let items = tiles.value else { return }
+        cache.save(items, userID: userID)
     }
 }
