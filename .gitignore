@@ -12,9 +12,8 @@ xcuserdata/
 .DS_Store
 
 # Secrets / local config — never commit Supabase keys, env files
+# App config lives in the git-ignored Supabase.plist (Supabase + Brandfetch).
 *.env
 .env*
-Secrets.xcconfig
-Secrets.plist
 Supabase.plist
 *.local.*
