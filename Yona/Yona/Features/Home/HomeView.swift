@@ -104,7 +104,18 @@ struct HomeView: View {
                         TileCard(tile: tile)
                     }
                     .buttonStyle(.plain)
-                    .overlay(alignment: .topTrailing) { tileMenu(tile) }
+                    .contextMenu {
+                        Button {
+                            editingTile = tile
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        Button(role: .destructive) {
+                            pendingDelete = tile
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
             }
             .padding(DesignTokens.Spacing.l)
@@ -122,30 +133,6 @@ struct HomeView: View {
             tile.title.range(of: query, options: options) != nil
                 || tile.url.range(of: query, options: options) != nil
         }
-    }
-
-    private func tileMenu(_ tile: Tile) -> some View {
-        Menu {
-            Button {
-                editingTile = tile
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
-            Button(role: .destructive) {
-                pendingDelete = tile
-            } label: {
-                Label("Delete", systemImage: "trash")
-            }
-        } label: {
-            Image(systemName: "ellipsis")
-                .font(.subheadline.weight(.bold))
-                .foregroundStyle(.secondary)
-                .frame(width: 30, height: 30)
-                .background(.ultraThinMaterial, in: Circle())
-                .contentShape(Circle())
-        }
-        .accessibilityLabel("More options for \(tile.title)")
-        .padding(DesignTokens.Spacing.s)
     }
 
     private var emptyState: some View {
