@@ -92,4 +92,4 @@ Tracked here so nothing is forgotten. Order TBD.
 
 ## Status
 
-**Phase 0 complete** — app builds + launches, CI green (build + SwiftLint). **Now entering Phase 1 — Backend Live & Authentication, Slice 1.** See `project-manager-log.md` for the running journal.
+**Phase 1 complete** — Google sign-in verified end-to-end, session persistence + sign-out working, CI green; tagged **`v0.1.0 — Authentication`**. **Now entering Phase 2 — Tile CRUD, Slice 1.** See `project-manager-log.md` for the running journal.

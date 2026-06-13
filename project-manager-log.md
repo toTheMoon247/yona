@@ -37,3 +37,18 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 
 - **Turn on accounts and login.** Set up our cloud database and get "Sign in with Google" working from start to finish. ("Sign in with Apple" stays a placeholder button until we join Apple's paid developer program later on.)
 - Once login works, this becomes our first official saved version of the app.
+
+---
+
+## Day 3 — 2026-06-13
+
+**Today.** Got login fully working — you can now sign into Yona with Google.
+
+- **Connected the app to our cloud and to Google.** Set up the live database, turned on "Sign in with Google," and linked it all to the app.
+- **Sign-in works start to finish.** Tapping "Continue with Google," approving in Google, and landing back in the app signed-in all works — tested on the simulator. (Hit one snag — the login was bouncing to the wrong page afterward — and fixed it.)
+- **It remembers you.** Close and reopen the app and you're still signed in; signing out takes you back to the login screen. "Sign in with Apple" is shown but switched off until we join Apple's paid program later.
+- **Saved a first official version.** Marked this as our first milestone — a safe point we can always return to.
+
+**Where we are.** The app now has real, working login backed by the cloud. Next we build the actual content.
+
+**Next steps (next day).** Start building the heart of the app: creating, viewing, editing, and deleting your account "tiles," and the home screen grid that shows them.
