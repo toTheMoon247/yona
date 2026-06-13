@@ -48,11 +48,16 @@ final class SupabaseRepository {
             let title: String
             let url: String
             let notes: String?
-            let cost_amount: Double?
-            let cost_period: String?
+            let costAmount: Double?
+            let costPeriod: String?
+            enum CodingKeys: String, CodingKey {
+                case title, url, notes
+                case costAmount = "cost_amount"
+                case costPeriod = "cost_period"
+            }
         }
         let payload = Payload(title: title, url: url, notes: notes,
-                              cost_amount: costAmount, cost_period: costPeriod?.rawValue)
+                              costAmount: costAmount, costPeriod: costPeriod?.rawValue)
         return try await client
             .from("tiles")
             .insert(payload)
