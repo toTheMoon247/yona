@@ -92,4 +92,4 @@ Tracked here so nothing is forgotten. Order TBD.
 
 ## Status
 
-**Phase 2 complete** — tile CRUD (create/view/edit/delete) + search verified, CI green; tagged **`v0.2.0 — Tiles`**. **Now entering Phase 3 — Logos, Slice 1.** See `project-manager-log.md` for the running journal.
+**Phase 3 complete** — real Brandfetch logos with letter-tile fallback + disk caching, verified on device, CI green; tagged **`v0.3.0 — Logos`**. **Now entering Phase 4 — Polish, Slice 1.** See `project-manager-log.md` for the running journal.

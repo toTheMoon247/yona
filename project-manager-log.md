@@ -68,3 +68,19 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The app is genuinely usable now: sign in and keep all your important accounts in one place. The logos are still simple letter placeholders.
 
 **Next steps (next day).** Make it look polished by fetching the real brand logos (the Netflix "N," the Spotify circle, and so on) instead of the letter placeholders.
+
+---
+
+## Day 5 — 2026-06-13
+
+**Today.** Replaced the plain letter placeholders with real brand logos.
+
+- **Real logos.** Each account now shows its actual brand logo (Netflix's "N," Spotify's circle, Dropbox's box, and so on) instead of a colored letter.
+- **Graceful fallback.** If a brand isn't recognized, the tile keeps its colored letter — so there's never a broken or blank logo.
+- **Fast.** Logos are saved on the device after the first load, so they appear instantly next time.
+- **Tidied up.** Removed an old leftover settings file we no longer use.
+- **Saved another official version** — our third milestone.
+
+**Where we are.** The app now looks the part — it matches the original mockup. Sign in, add accounts, and see real logos, all working.
+
+**Next steps (next day).** A polish pass — smooth out the loading and empty screens, add an app icon, and improve accessibility — to get it feeling fully finished.

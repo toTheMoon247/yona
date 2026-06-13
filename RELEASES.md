@@ -4,6 +4,17 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.3.0 — Logos · 2026-06-13
+
+Real brand logos replace the letter-tile placeholders.
+
+- **Brandfetch Logo API**: each tile shows its brand icon on a white circle (grid + detail).
+- **Letter-tile fallback** while loading and for any brand Brandfetch doesn't recognize
+  (`fallback/404` → clean miss, never a broken image).
+- Logos **cache to disk** (larger shared `URLCache`) for instant loads on relaunch.
+- **Domain extraction** (host minus `www`) as the lookup key, with unit tests.
+- Config: `BRANDFETCH_CLIENT_ID` read from the git-ignored `Supabase.plist`.
+
 ## v0.2.0 — Tiles · 2026-06-13
 
 The core of the app: users can manage their account tiles.
