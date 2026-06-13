@@ -92,4 +92,4 @@ Tracked here so nothing is forgotten. Order TBD.
 
 ## Status
 
-**Phase 1 complete** — Google sign-in verified end-to-end, session persistence + sign-out working, CI green; tagged **`v0.1.0 — Authentication`**. **Now entering Phase 2 — Tile CRUD, Slice 1.** See `project-manager-log.md` for the running journal.
+**Phase 2 complete** — tile CRUD (create/view/edit/delete) + search verified, CI green; tagged **`v0.2.0 — Tiles`**. **Now entering Phase 3 — Logos, Slice 1.** See `project-manager-log.md` for the running journal.

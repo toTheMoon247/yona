@@ -52,3 +52,19 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The app now has real, working login backed by the cloud. Next we build the actual content.
 
 **Next steps (next day).** Start building the heart of the app: creating, viewing, editing, and deleting your account "tiles," and the home screen grid that shows them.
+
+---
+
+## Day 4 — 2026-06-13
+
+**Today.** Built the heart of the app — you can now add and manage your accounts.
+
+- **The home screen of tiles is live.** Your saved accounts show as a grid of cards, each with a colored placeholder logo and a little marker when it has a note.
+- **Full add / open / edit / delete.** Tap "+" to add an account (name, website, optional note); tap a tile to see it and open its website inside the app; edit or delete any tile.
+- **Search.** A search bar finds tiles by name or web address as you type, ignoring capital letters and accents.
+- **Fixed a small bug** where clearing a note didn't stick — now it does.
+- **Saved another official version** — our second milestone.
+
+**Where we are.** The app is genuinely usable now: sign in and keep all your important accounts in one place. The logos are still simple letter placeholders.
+
+**Next steps (next day).** Make it look polished by fetching the real brand logos (the Netflix "N," the Spotify circle, and so on) instead of the letter placeholders.
