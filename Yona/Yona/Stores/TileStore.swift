@@ -67,6 +67,8 @@ final class TileStore {
     func delete(_ tile: Tile) async {
         do {
             try await repository.deleteTile(id: tile.id)
+            // Best-effort: remove the tile's files (orphans are harmless if this fails).
+            try? await repository.deleteTileAttachments(tileID: tile.id)
             guard var current = tiles.value else { return }
             current.removeAll { $0.id == tile.id }
             tiles = .loaded(current)

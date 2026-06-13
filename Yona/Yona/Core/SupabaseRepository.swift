@@ -122,6 +122,27 @@ final class SupabaseRepository {
             .from("documents")
             .createSignedURL(path: storagePath, expiresIn: expiresIn)
     }
+
+    /// Remove a single attachment: the Storage object first, then its row.
+    func deleteAttachment(_ attachment: Attachment) async throws {
+        try await client.storage.from("documents").remove(paths: [attachment.storagePath])
+        try await client
+            .from("attachments")
+            .delete()
+            .eq("id", value: attachment.id.uuidString)
+            .execute()
+    }
+
+    /// Sweep a tile's Storage folder (the row cascade doesn't remove the files).
+    func deleteTileAttachments(tileID: UUID) async throws {
+        guard let userID = currentUserID else { return }
+        let folder = "\(userID.lowercased())/\(tileID.uuidString.lowercased())"
+        let objects = try await client.storage.from("documents").list(path: folder)
+        let paths = objects.map { "\(folder)/\($0.name)" }
+        if !paths.isEmpty {
+            try await client.storage.from("documents").remove(paths: paths)
+        }
+    }
 }
 
 /// Encodable body for tile insert/update. Nil fields are written as explicit

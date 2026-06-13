@@ -111,6 +111,31 @@ struct AttachmentsView: View {
         .buttonStyle(.plain)
         .disabled(openingID != nil)
         .padding(.vertical, 2)
+        .contextMenu {
+            Button(role: .destructive) {
+                Task { await remove(attachment) }
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+    }
+
+    private func remove(_ attachment: Attachment) async {
+        errorMessage = nil
+        do {
+            try await repository.deleteAttachment(attachment)
+            if var current = attachments.value {
+                current.removeAll { $0.id == attachment.id }
+                attachments = .loaded(current)
+            }
+            Haptics.success()
+        } catch {
+            #if DEBUG
+            errorMessage = "Couldn't delete: \(error)"
+            #else
+            errorMessage = "Couldn't delete this document."
+            #endif
+        }
     }
 
     private func load() async {
