@@ -31,7 +31,13 @@ with the broader "service" model in #3.
 
 ---
 
-## 3. Revisit the Title + URL model  _(open decision)_
+## 3. Revisit the Title + URL model  _(partly handled by #7; open: optional URL)_
+
+> **Update:** service search (#7) auto-fills title from the picked brand, so the
+> "is Title redundant" half is effectively handled. **Still open:** making **URL
+> optional** to support no-website records (local agent, private membership,
+> offline service) — search doesn't change that the form still requires a URL.
+
 
 **Today:** Title (required) + URL (required).
 
@@ -91,7 +97,7 @@ default + per-tile override).
 - Open Qs: recurring dates (monthly/yearly) should auto-advance after each
   renewal; multiple reminders per tile; per-device scheduling from synced data.
 
-## 7. Service search / smart add  _(idea — strong; largely supersedes #3)_
+## 7. Service search / smart add  _(✅ shipped — Brandfetch Brand Search)_
 
 Instead of pasting a URL + typing a title, **search for a service by name** and
 auto-fill everything.
