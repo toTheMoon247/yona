@@ -144,6 +144,7 @@ struct HomeView: View {
                 .background(.ultraThinMaterial, in: Circle())
                 .contentShape(Circle())
         }
+        .accessibilityLabel("More options for \(tile.title)")
         .padding(DesignTokens.Spacing.s)
     }
 

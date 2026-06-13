@@ -38,5 +38,7 @@ struct TileCard: View {
             DesignTokens.tileBackground(for: tile.id.uuidString),
             in: RoundedRectangle(cornerRadius: DesignTokens.Radius.tile, style: .continuous)
         )
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(tile.hasNotes ? "\(tile.title), has a note" : tile.title)
     }
 }
