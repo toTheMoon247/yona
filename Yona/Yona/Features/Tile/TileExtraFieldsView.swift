@@ -69,6 +69,7 @@ struct TileExtraFieldsView: View {
         if months != 0 { date = calendar.date(byAdding: .month, value: months, to: date) ?? date }
         if years != 0 { date = calendar.date(byAdding: .year, value: years, to: date) ?? date }
         renewalDate = date
+        Haptics.tap()
     }
 
     /// When the renewal date is switched on and a cost is set, default "Repeats" to match it.
