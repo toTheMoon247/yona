@@ -50,6 +50,12 @@ struct TileDetailView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
+                if let cost = tile.formattedCost {
+                    Label(cost, systemImage: "creditcard")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
                 Button {
                     showingSafari = true
                 } label: {

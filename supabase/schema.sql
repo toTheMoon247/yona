@@ -19,6 +19,8 @@ create table if not exists public.tiles (
   url         text        not null check (length(trim(url)) > 0),
   logo_url    text,                                   -- resolved once at create/edit
   notes       text,                                   -- Option A: single optional text field
+  cost_amount numeric(12,2),                          -- optional cost tracking
+  cost_period text check (cost_period in ('monthly', 'yearly')),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );

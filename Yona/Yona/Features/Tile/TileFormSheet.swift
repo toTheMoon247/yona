@@ -2,8 +2,9 @@
 //  TileFormSheet.swift
 //  Yona
 //
-//  One form for both creating and editing a tile. Title + URL required, notes
-//  optional. On save it inserts/updates and dismisses; on failure it stays open.
+//  One form for both creating and editing a tile. Title + URL required; notes
+//  and cost optional. On save it inserts/updates and dismisses; on failure it
+//  stays open with an error.
 //
 
 import SwiftUI
@@ -22,6 +23,8 @@ struct TileFormSheet: View {
     @State private var title: String
     @State private var urlText: String
     @State private var notes: String
+    @State private var costText: String
+    @State private var costPeriod: CostPeriod
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -32,10 +35,16 @@ struct TileFormSheet: View {
             _title = State(initialValue: "")
             _urlText = State(initialValue: "")
             _notes = State(initialValue: "")
+            _costText = State(initialValue: "")
+            _costPeriod = State(initialValue: .monthly)
         case let .edit(tile):
             _title = State(initialValue: tile.title)
             _urlText = State(initialValue: tile.url)
             _notes = State(initialValue: tile.notes ?? "")
+            _costText = State(initialValue: tile.costAmount.map {
+                $0.formatted(.number.precision(.fractionLength(0...2)))
+            } ?? "")
+            _costPeriod = State(initialValue: tile.costPeriod ?? .monthly)
         }
     }
 
@@ -46,6 +55,17 @@ struct TileFormSheet: View {
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedURL: String { urlText.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var canSave: Bool { !trimmedTitle.isEmpty && !trimmedURL.isEmpty && !isSaving }
+
+    /// Parsed (amount, period) from the cost field — both nil when empty/invalid.
+    private var parsedCost: (amount: Double?, period: CostPeriod?) {
+        let normalized = costText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
+        if let amount = Double(normalized), amount > 0 {
+            return (amount, costPeriod)
+        }
+        return (nil, nil)
+    }
 
     var body: some View {
         NavigationStack {
@@ -60,6 +80,19 @@ struct TileFormSheet: View {
                 Section("Notes (optional)") {
                     TextField("Notes", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
+                }
+                Section("Cost (optional)") {
+                    HStack {
+                        Text(Locale.current.currencySymbol ?? "$")
+                            .foregroundStyle(.secondary)
+                        TextField("Amount", text: $costText)
+                            .keyboardType(.decimalPad)
+                    }
+                    Picker("Billing", selection: $costPeriod) {
+                        Text("Monthly").tag(CostPeriod.monthly)
+                        Text("Yearly").tag(CostPeriod.yearly)
+                    }
+                    .pickerStyle(.segmented)
                 }
                 if let errorMessage {
                     Section {
@@ -95,13 +128,16 @@ struct TileFormSheet: View {
         let cleanNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalNotes: String? = cleanNotes.isEmpty ? nil : cleanNotes
         let finalURL = URLHelpers.normalized(trimmedURL)
+        let (amount, period) = parsedCost
 
         do {
             switch mode {
             case .create:
-                try await tileStore.create(title: trimmedTitle, url: finalURL, notes: finalNotes)
+                try await tileStore.create(title: trimmedTitle, url: finalURL, notes: finalNotes,
+                                           costAmount: amount, costPeriod: period)
             case let .edit(tile):
-                try await tileStore.update(id: tile.id, title: trimmedTitle, url: finalURL, notes: finalNotes)
+                try await tileStore.update(id: tile.id, title: trimmedTitle, url: finalURL,
+                                           notes: finalNotes, costAmount: amount, costPeriod: period)
             }
             Haptics.success()
             dismiss()

@@ -98,6 +98,7 @@ struct HomeView: View {
 
     private func grid(_ items: [Tile]) -> some View {
         ScrollView {
+            costSummary(items)
             LazyVGrid(columns: columns, spacing: DesignTokens.Spacing.l) {
                 ForEach(items) { tile in
                     NavigationLink(value: tile) {
@@ -132,6 +133,25 @@ struct HomeView: View {
         return items.filter { tile in
             tile.title.range(of: query, options: options) != nil
                 || tile.url.range(of: query, options: options) != nil
+        }
+    }
+
+    @ViewBuilder
+    private func costSummary(_ items: [Tile]) -> some View {
+        let total = items.compactMap(\.monthlyCost).reduce(0, +)
+        let count = items.filter { $0.monthlyCost != nil }.count
+        if total > 0 {
+            HStack(spacing: DesignTokens.Spacing.xs) {
+                Image(systemName: "creditcard")
+                Text("≈ \(total.formatted(.currency(code: Tile.currencyCode)))/mo")
+                    .fontWeight(.medium)
+                Text("· \(count) paid")
+                Spacer()
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, DesignTokens.Spacing.l)
+            .padding(.top, DesignTokens.Spacing.s)
         }
     }
 
