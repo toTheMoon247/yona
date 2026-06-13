@@ -103,4 +103,4 @@ Title/URL model rethink (roadmap #3), Family Vault, Emergency Access, plus categ
 
 ## Status
 
-**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Phase 6 — Renewal Dates complete** (tagged `v0.4.2`). Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.
+**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Phase 6 — Renewal Dates complete + post-MVP feature work** (service search, two-step add flow, recurring renewals), tagged through **`v0.4.3`**. Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.

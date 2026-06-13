@@ -132,3 +132,18 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** A polished app on a real phone that tracks your accounts, their costs, and their renewal dates. Apple approval is pending.
 
 **Next steps.** Once Apple approves: turn on "Sign in with Apple" and get the app onto TestFlight. (Reminders and document attachments are planned but parked for now.)
+
+---
+
+## Day 9 — 2026-06-13
+
+**Today.** Made adding accounts much smoother and made renewals smarter.
+
+- **Search to add.** Instead of pasting a web address, you can now search a service by name (e.g. "Netflix"), pick it from a list, and the name, link, and logo fill in automatically. Manual entry is still there for anything not found.
+- **Two-step add.** Adding an account is now two clean steps — first pick the service, then add the optional details (notes, cost, renewal) — so it's less cluttered and more natural.
+- **Smarter renewals.** Renewal dates can now repeat (monthly/yearly) and always show the *next* upcoming date automatically, so they never go stale. Added quick "+1 month / +1 year" buttons with a little tap feedback.
+- **Saved a checkpoint.**
+
+**Where we are.** Yona is a polished subscription/account tracker on a real phone — easy to add to, with costs and recurring renewal dates. Apple approval still pending.
+
+**Next steps.** Once Apple approves: Apple sign-in + TestFlight. (Reminders and document attachments still parked.)

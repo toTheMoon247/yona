@@ -4,6 +4,17 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.4.3 — Smart add & recurring renewals · 2026-06-13
+
+- **Service search:** type a brand name → pick from results (logo + name + domain)
+  → title / URL / logo auto-fill (Brandfetch Brand Search). Manual entry remains.
+- **Two-step add flow:** Step 1 identifies the service (with a logo confirmation);
+  Step 2 adds the optional details. Editing stays a single screen.
+- **Recurring renewals:** a "Repeats" cadence (monthly / yearly / never) with the
+  next occurrence computed forward so it never goes stale; Today / +1 month /
+  +1 year quick chips (with a light haptic); smart default from the cost period.
+  (Migration `0003_renewal_repeat.sql`.)
+
 ## v0.4.2 — Renewal dates · 2026-06-13
 
 Phase 6: an optional renewal/due date per tile (with cost tracking, Yona is now
