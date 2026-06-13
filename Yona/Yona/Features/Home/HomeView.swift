@@ -24,6 +24,9 @@ struct HomeView: View {
         NavigationStack {
             content
                 .overlay(alignment: .bottomTrailing) { createButton }
+                .navigationDestination(for: Tile.self) { tile in
+                    TileDetailView(tile: tile)
+                }
                 .navigationTitle("Yona")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -67,7 +70,10 @@ struct HomeView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: DesignTokens.Spacing.l) {
                 ForEach(items) { tile in
-                    TileCard(tile: tile)
+                    NavigationLink(value: tile) {
+                        TileCard(tile: tile)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(DesignTokens.Spacing.l)
