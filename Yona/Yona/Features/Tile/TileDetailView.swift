@@ -40,6 +40,9 @@ struct TileDetailView: View {
             VStack(spacing: DesignTokens.Spacing.l) {
                 TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
                     .frame(width: 96, height: 96)
+                    .overlay {
+                        Circle().strokeBorder(Color(.separator), lineWidth: 1)
+                    }
                     .padding(.top, DesignTokens.Spacing.l)
 
                 Text(tile.title)
