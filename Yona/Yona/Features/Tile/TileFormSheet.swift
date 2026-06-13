@@ -76,6 +76,9 @@ struct TileFormSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !isEditing {
+                    ServiceSearchField(title: $title, urlText: $urlText)
+                }
                 Section {
                     TextField("Title", text: $title)
                     TextField("URL", text: $urlText)
