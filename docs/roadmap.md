@@ -134,6 +134,42 @@ so upcoming charges float to the top.
 
 ---
 
+## 8. Cost breakdown screen  _(idea)_
+
+Tap the monthly-total summary on Home → a breakdown screen listing every tile
+with a cost (normalized to monthly, sorted high → low) with the running total;
+maybe a monthly/yearly toggle and each item's share of the total.
+
+- **Low effort** — the data's already there (`monthlyCost` per tile); it's a new
+  screen + making the existing Home summary tappable.
+
+## 9. Choose currency  _(idea)_
+
+Today the currency follows the device locale. Let the user pick the display currency.
+
+- **App-wide setting = small** (one preference, applied in formatting). **Per-tile
+  currency = much bigger** — mixing currencies breaks the monthly total, so it
+  needs FX conversion + live rates. Recommend app-wide first; per-tile later.
+
+## 10. Tags on a tile  _(idea)_
+
+Freeform tags/labels for grouping + filtering on Home (e.g. "work", "family",
+"streaming"). The MVP deliberately cut rigid categories/folders — **tags are the
+lighter, more flexible take** (many per tile, no hierarchy).
+
+- Needs a tags field + an add/edit UI + filter-by-tag on Home. Moderate effort.
+
+## 11. Family members / profile switching  _(idea — big; this is "Family Vault")_
+
+"These are *my* tiles → switch to **Mom's** tiles." A profile switcher across
+several people's vaults.
+
+- This is the concrete shape of the **Family Vault** item below. **Heaviest** of
+  all the ideas: a multi-owner data model, sharing + permissions, RLS rework (who
+  can see whose tiles), and an account-switcher UI. A real project, not a quick add.
+
+---
+
 ## Already tracked elsewhere (Future / Pro)
 
 From the original spec, beyond the above: **Family Vault** (share tiles with
