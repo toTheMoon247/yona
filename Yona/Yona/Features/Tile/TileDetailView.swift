@@ -76,6 +76,14 @@ struct TileDetailView: View {
             .frame(maxWidth: .infinity)
             .padding()
         }
+        .safeAreaInset(edge: .bottom) {
+            Text("Tile created \(tile.createdAt.formatted(date: .abbreviated, time: .omitted))")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal)
+                .padding(.bottom, DesignTokens.Spacing.s)
+        }
         .navigationTitle(tile.title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
