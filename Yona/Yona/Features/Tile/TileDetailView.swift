@@ -38,7 +38,7 @@ struct TileDetailView: View {
     private func detail(_ tile: Tile) -> some View {
         ScrollView {
             VStack(spacing: DesignTokens.Spacing.l) {
-                TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url, size: 256)
+                TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
                     .frame(width: 96, height: 96)
                     .padding(.top, DesignTokens.Spacing.l)
 

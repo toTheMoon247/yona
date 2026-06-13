@@ -2,7 +2,7 @@
 //  TileCard.swift
 //  Yona
 //
-//  A single tile on the Home grid: placeholder logo, title, and a note indicator.
+//  A single tile on the Home grid: a large brand logo with the title beneath it.
 //
 
 import SwiftUI
@@ -12,25 +12,19 @@ struct TileCard: View {
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.s) {
-            TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
-                .frame(width: 56, height: 56)
+            // Square logo, inset a little for breathing room.
+            Color.clear
+                .aspectRatio(1, contentMode: .fit)
+                .overlay {
+                    TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
+                }
+                .padding(.horizontal, DesignTokens.Spacing.l)
                 .padding(.top, DesignTokens.Spacing.s)
 
             Text(tile.title)
-                .font(.headline)
+                .font(.subheadline.weight(.medium))
                 .lineLimit(1)
                 .foregroundStyle(.primary)
-
-            // Reserve a constant row so cards line up whether or not they have a note.
-            HStack(spacing: DesignTokens.Spacing.xs) {
-                if tile.hasNotes {
-                    Label("note", systemImage: "note.text")
-                        .labelStyle(.titleAndIcon)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .frame(height: 16)
         }
         .frame(maxWidth: .infinity)
         .padding(DesignTokens.Spacing.m)

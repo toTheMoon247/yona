@@ -14,7 +14,7 @@ struct TileLogoView: View {
     let title: String
     let seed: String
     let websiteURL: String
-    var size: Int = 256
+    var size: Int = 512
 
     @State private var loaded: UIImage?
     @State private var didFail = false
