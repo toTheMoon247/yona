@@ -32,4 +32,13 @@ final class TileStore {
             tiles = .failed(error)
         }
     }
+
+    /// Create a tile and prepend it to the list. Throws so the form can surface
+    /// the failure and stay open.
+    func create(title: String, url: String, notes: String?) async throws {
+        let tile = try await repository.createTile(title: title, url: url, notes: notes)
+        var current = tiles.value ?? []
+        current.insert(tile, at: 0)
+        tiles = .loaded(current)
+    }
 }

@@ -34,4 +34,21 @@ final class SupabaseRepository {
             .execute()
             .value
     }
+
+    /// Insert a tile (user_id is filled by the column's `auth.uid()` default) and
+    /// return the created row.
+    func createTile(title: String, url: String, notes: String?) async throws -> Tile {
+        struct Payload: Encodable {
+            let title: String
+            let url: String
+            let notes: String?
+        }
+        return try await client
+            .from("tiles")
+            .insert(Payload(title: title, url: url, notes: notes))
+            .select()
+            .single()
+            .execute()
+            .value
+    }
 }

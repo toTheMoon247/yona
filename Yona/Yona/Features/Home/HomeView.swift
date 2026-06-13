@@ -3,7 +3,8 @@
 //  Yona
 //
 //  The signed-in home: a 2-column grid of the user's tiles, with loading,
-//  empty, and error states. Create/detail/edit/search land in later slices.
+//  empty, and error states, plus the floating "+" to add a tile.
+//  Detail / edit / search land in later slices.
 //
 
 import SwiftUI
@@ -11,6 +12,8 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AuthStore.self) private var auth
     @Environment(TileStore.self) private var tileStore
+
+    @State private var showingCreate = false
 
     private let columns = [
         GridItem(.flexible(), spacing: DesignTokens.Spacing.l),
@@ -20,6 +23,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             content
+                .overlay(alignment: .bottomTrailing) { createButton }
                 .navigationTitle("Yona")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -33,6 +37,9 @@ struct HomeView: View {
                     }
                 }
                 .task { await tileStore.load() }
+                .sheet(isPresented: $showingCreate) {
+                    CreateTileSheet()
+                }
         }
     }
 
@@ -72,7 +79,7 @@ struct HomeView: View {
         ContentUnavailableView {
             Label("No tiles yet", systemImage: "square.grid.2x2")
         } description: {
-            Text("Your saved accounts will appear here.")
+            Text("Tap + to add your first account.")
         }
     }
 
@@ -87,5 +94,20 @@ struct HomeView: View {
             }
             .buttonStyle(.borderedProminent)
         }
+    }
+
+    private var createButton: some View {
+        Button {
+            showingCreate = true
+        } label: {
+            Image(systemName: "plus")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(Color.accentColor, in: Circle())
+                .shadow(radius: 4, y: 2)
+        }
+        .padding(DesignTokens.Spacing.l)
+        .accessibilityLabel("Add tile")
     }
 }
