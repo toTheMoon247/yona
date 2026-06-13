@@ -70,9 +70,7 @@ struct TileLogoView: View {
         image
             .resizable()
             .scaledToFit()
-            .padding(8)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(.white)
             .clipShape(Circle())
     }
 
