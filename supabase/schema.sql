@@ -21,6 +21,7 @@ create table if not exists public.tiles (
   notes       text,                                   -- Option A: single optional text field
   cost_amount numeric(12,2),                          -- optional cost tracking
   cost_period text check (cost_period in ('monthly', 'yearly')),
+  renewal_date date,                                  -- optional renewal/due date
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );

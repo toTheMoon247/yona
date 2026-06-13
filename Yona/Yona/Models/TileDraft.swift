@@ -14,4 +14,5 @@ struct TileDraft {
     var notes: String?
     var costAmount: Double?
     var costPeriod: CostPeriod?
+    var renewalDate: Date?
 }

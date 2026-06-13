@@ -78,18 +78,29 @@ _Milestone: **`v0.5.0 — Beta`**. `v1.0.0` reserved for App Store launch._
 
 ---
 
-## Post-MVP roadmap
+## Additional feature phases (post feature-complete)
 
-Tracked here so nothing is forgotten. Order TBD.
+Built opportunistically after the MVP. Statuses reflect current intent; see
+`docs/roadmap.md` for the product reasoning.
 
-- **Documents / Attachments (v1.x, first up).** Attach/store/view/delete files on a tile. The schema (`attachments` table + `documents` bucket) is already in place — this is pure app-code work: `fileImporter`, 25 MB client-side cap, upload to `documents/{user_id}/{tile_id}/{uuid}-{filename}`, signed-URL + QuickLook view, single-attachment delete, and a tile-delete folder sweep (cascade only removes rows). Re-adds the "N docs" indicator on Home and the attachments section on Detail.
-- **Family Vault** — share/manage tiles for family members.
-- **Reminders** — insurance/subscription renewals, passport expiration (the mockup's 🔔 bell).
-- **Emergency Access** — trusted family members access shared info when needed.
-- Also out of MVP: categories, folders, password management, AI features, offline mode.
+### Phase 6 — Renewal Dates & Sorting  _(in progress)_
+**Goal:** an optional renewal/due date per tile, surfaced and sortable.
+- **Slice 1 — The field.** `renewal_date` column; `renewalDate` on `Tile` + `TileDraft`; an optional `DatePicker` in the form; show the date on the detail screen.
+- **Slice 2 — Sort & surface.** Home sort menu (due date / name / recently added / cost); "renews in N days" hint.
+
+### Phase 7 — Renewal Reminders  _(on hold)_
+**Goal:** notify the user before a renewal, at a user-chosen lead time.
+Local notifications (no server / no APNs — **not gated on the paid Apple program**), permission flow, per-tile scheduling, configurable lead time (day-of / 1 day / 3 days / week), auto-advance for recurring dates, reschedule/cancel on edit/delete. Depends on Phase 6's date field.
+
+### Phase 8 — Document Attachments  _(on hold)_
+**Goal:** upload/store/view/delete documents on a tile.
+Schema already reserved (`attachments` table + `documents` bucket + RLS). App work: `fileImporter`, 25 MB cap, upload to Storage, signed-URL + QuickLook view, single-attachment delete, tile-delete folder sweep, "N docs" indicator. The heaviest of the post-MVP items.
+
+### Further ideas (not yet phased)
+Title/URL model rethink (roadmap #3), Family Vault, Emergency Access, plus categories / folders / password management / AI / offline — see `docs/roadmap.md`.
 
 ---
 
 ## Status
 
-**Phase 4 complete** — polish (motion, instant on-disk cache, app icon, accessibility), CI green; tagged **`v0.4.0 — MVP feature-complete`**. **Now entering Phase 5 — Apple Sign-In & Beta** (gated on Apple Developer Program enrollment). See `project-manager-log.md` for the running journal.
+**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Building Phase 6 — Renewal Dates** in the meantime; Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.

@@ -93,6 +93,12 @@ struct TileDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
+            if let renews = tile.formattedRenewalDate {
+                Label("Renews \(renews)", systemImage: "calendar")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
             Button {
                 showingSafari = true
             } label: {

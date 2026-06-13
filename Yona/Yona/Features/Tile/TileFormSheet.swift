@@ -25,6 +25,8 @@ struct TileFormSheet: View {
     @State private var notes: String
     @State private var costText: String
     @State private var costPeriod: CostPeriod
+    @State private var hasRenewalDate: Bool
+    @State private var renewalDate: Date
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -37,6 +39,8 @@ struct TileFormSheet: View {
             _notes = State(initialValue: "")
             _costText = State(initialValue: "")
             _costPeriod = State(initialValue: .monthly)
+            _hasRenewalDate = State(initialValue: false)
+            _renewalDate = State(initialValue: Date())
         case let .edit(tile):
             _title = State(initialValue: tile.title)
             _urlText = State(initialValue: tile.url)
@@ -45,6 +49,8 @@ struct TileFormSheet: View {
                 $0.formatted(.number.precision(.fractionLength(0...2)))
             } ?? "")
             _costPeriod = State(initialValue: tile.costPeriod ?? .monthly)
+            _hasRenewalDate = State(initialValue: tile.renewalDate != nil)
+            _renewalDate = State(initialValue: tile.renewalDate ?? Date())
         }
     }
 
@@ -94,6 +100,12 @@ struct TileFormSheet: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                Section("Renewal date (optional)") {
+                    Toggle("Set a renewal date", isOn: $hasRenewalDate)
+                    if hasRenewalDate {
+                        DatePicker("Renews on", selection: $renewalDate, displayedComponents: .date)
+                    }
+                }
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(.red)
@@ -132,7 +144,8 @@ struct TileFormSheet: View {
             url: URLHelpers.normalized(trimmedURL),
             notes: cleanNotes.isEmpty ? nil : cleanNotes,
             costAmount: amount,
-            costPeriod: period
+            costPeriod: period,
+            renewalDate: hasRenewalDate ? renewalDate : nil
         )
 
         do {
