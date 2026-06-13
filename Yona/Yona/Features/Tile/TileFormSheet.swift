@@ -126,18 +126,21 @@ struct TileFormSheet: View {
         defer { isSaving = false }
 
         let cleanNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-        let finalNotes: String? = cleanNotes.isEmpty ? nil : cleanNotes
-        let finalURL = URLHelpers.normalized(trimmedURL)
         let (amount, period) = parsedCost
+        let draft = TileDraft(
+            title: trimmedTitle,
+            url: URLHelpers.normalized(trimmedURL),
+            notes: cleanNotes.isEmpty ? nil : cleanNotes,
+            costAmount: amount,
+            costPeriod: period
+        )
 
         do {
             switch mode {
             case .create:
-                try await tileStore.create(title: trimmedTitle, url: finalURL, notes: finalNotes,
-                                           costAmount: amount, costPeriod: period)
+                try await tileStore.create(draft)
             case let .edit(tile):
-                try await tileStore.update(id: tile.id, title: trimmedTitle, url: finalURL,
-                                           notes: finalNotes, costAmount: amount, costPeriod: period)
+                try await tileStore.update(id: tile.id, draft)
             }
             Haptics.success()
             dismiss()

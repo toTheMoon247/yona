@@ -2,9 +2,9 @@
 //  TileDetailView.swift
 //  Yona
 //
-//  Full view of a tile: logo, title, the site (Open Website), and notes, plus
-//  Edit / Delete. Reads the live tile from the store (by id) so edits reflect
-//  immediately and a delete pops back to Home.
+//  Full view of a tile: logo, title, the site (Open Website), cost, and notes,
+//  plus Edit / Delete. Reads the live tile from the store (by id) so edits
+//  reflect immediately and a delete pops back to Home.
 //
 
 import SwiftUI
@@ -34,79 +34,22 @@ struct TileDetailView: View {
         }
     }
 
-    @ViewBuilder
     private func detail(_ tile: Tile) -> some View {
         ScrollView {
             VStack(spacing: DesignTokens.Spacing.l) {
-                TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
-                    .frame(width: 96, height: 96)
-                    .overlay {
-                        Circle().strokeBorder(Color(.separator), lineWidth: 1)
-                    }
-                    .padding(.top, DesignTokens.Spacing.l)
-
-                Text(tile.title)
-                    .font(.title.bold())
-                    .multilineTextAlignment(.center)
-
-                Text(displayHost(tile))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                if let cost = tile.formattedCost {
-                    Label(cost, systemImage: "creditcard")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Button {
-                    showingSafari = true
-                } label: {
-                    Label("Open Website", systemImage: "safari")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(websiteURL(tile) == nil)
-                .padding(.horizontal)
-
+                header(tile)
                 if tile.hasNotes {
                     notesSection(tile)
                 }
-
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity)
             .padding()
         }
-        .safeAreaInset(edge: .bottom) {
-            Text("Tile created \(tile.createdAt.formatted(date: .abbreviated, time: .omitted))")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal)
-                .padding(.bottom, DesignTokens.Spacing.s)
-        }
+        .safeAreaInset(edge: .bottom) { createdFooter(tile) }
         .navigationTitle(tile.title)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        editing = true
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    Button(role: .destructive) {
-                        confirmingDelete = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
+        .toolbar { detailToolbar }
         .sheet(isPresented: $showingSafari) {
             if let url = websiteURL(tile) {
                 SafariView(url: url).ignoresSafeArea()
@@ -127,6 +70,69 @@ struct TileDetailView: View {
         } message: {
             Text("\"\(tile.title)\" will be permanently removed.")
         }
+    }
+
+    private func header(_ tile: Tile) -> some View {
+        VStack(spacing: DesignTokens.Spacing.l) {
+            TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
+                .frame(width: 96, height: 96)
+                .overlay { Circle().strokeBorder(Color(.separator), lineWidth: 1) }
+                .padding(.top, DesignTokens.Spacing.l)
+
+            Text(tile.title)
+                .font(.title.bold())
+                .multilineTextAlignment(.center)
+
+            Text(displayHost(tile))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            if let cost = tile.formattedCost {
+                Label(cost, systemImage: "creditcard")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Button {
+                showingSafari = true
+            } label: {
+                Label("Open Website", systemImage: "safari")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(websiteURL(tile) == nil)
+            .padding(.horizontal)
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var detailToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                Button {
+                    editing = true
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                Button(role: .destructive) {
+                    confirmingDelete = true
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+        }
+    }
+
+    private func createdFooter(_ tile: Tile) -> some View {
+        Text("Tile created \(tile.createdAt.formatted(date: .abbreviated, time: .omitted))")
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .padding(.bottom, DesignTokens.Spacing.s)
     }
 
     private func notesSection(_ tile: Tile) -> some View {

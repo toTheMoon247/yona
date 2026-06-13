@@ -45,10 +45,8 @@ final class TileStore {
 
     /// Create a tile and prepend it to the list. Throws so the form can surface
     /// the failure and stay open.
-    func create(title: String, url: String, notes: String?,
-                costAmount: Double?, costPeriod: CostPeriod?) async throws {
-        let tile = try await repository.createTile(title: title, url: url, notes: notes,
-                                                   costAmount: costAmount, costPeriod: costPeriod)
+    func create(_ draft: TileDraft) async throws {
+        let tile = try await repository.createTile(draft)
         var current = tiles.value ?? []
         current.insert(tile, at: 0)
         tiles = .loaded(current)
@@ -56,10 +54,8 @@ final class TileStore {
     }
 
     /// Update a tile in place. Throws so the form can surface the failure.
-    func update(id: UUID, title: String, url: String, notes: String?,
-                costAmount: Double?, costPeriod: CostPeriod?) async throws {
-        let updated = try await repository.updateTile(id: id, title: title, url: url, notes: notes,
-                                                      costAmount: costAmount, costPeriod: costPeriod)
+    func update(id: UUID, _ draft: TileDraft) async throws {
+        let updated = try await repository.updateTile(id: id, draft)
         guard var current = tiles.value,
               let index = current.firstIndex(where: { $0.id == id }) else { return }
         current[index] = updated

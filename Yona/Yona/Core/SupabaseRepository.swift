@@ -42,25 +42,10 @@ final class SupabaseRepository {
 
     /// Insert a tile (user_id is filled by the column's `auth.uid()` default) and
     /// return the created row.
-    func createTile(title: String, url: String, notes: String?,
-                    costAmount: Double?, costPeriod: CostPeriod?) async throws -> Tile {
-        struct Payload: Encodable {
-            let title: String
-            let url: String
-            let notes: String?
-            let costAmount: Double?
-            let costPeriod: String?
-            enum CodingKeys: String, CodingKey {
-                case title, url, notes
-                case costAmount = "cost_amount"
-                case costPeriod = "cost_period"
-            }
-        }
-        let payload = Payload(title: title, url: url, notes: notes,
-                              costAmount: costAmount, costPeriod: costPeriod?.rawValue)
-        return try await client
+    func createTile(_ draft: TileDraft) async throws -> Tile {
+        try await client
             .from("tiles")
-            .insert(payload)
+            .insert(TilePayload(draft))
             .select()
             .single()
             .execute()
@@ -68,36 +53,10 @@ final class SupabaseRepository {
     }
 
     /// Update a tile and return the refreshed row (`updated_at` is bumped by a DB trigger).
-    func updateTile(id: UUID, title: String, url: String, notes: String?,
-                    costAmount: Double?, costPeriod: CostPeriod?) async throws -> Tile {
-        // Custom encoder so nil fields are sent as explicit `null` (clearing the
-        // column) instead of being omitted — synthesized Encodable drops nil optionals,
-        // which would leave the old value in place.
-        struct Payload: Encodable {
-            let title: String
-            let url: String
-            let notes: String?
-            let costAmount: Double?
-            let costPeriod: String?
-            enum CodingKeys: String, CodingKey {
-                case title, url, notes
-                case costAmount = "cost_amount"
-                case costPeriod = "cost_period"
-            }
-            func encode(to encoder: Encoder) throws {
-                var container = encoder.container(keyedBy: CodingKeys.self)
-                try container.encode(title, forKey: .title)
-                try container.encode(url, forKey: .url)
-                try container.encode(notes, forKey: .notes)            // writes null when nil
-                try container.encode(costAmount, forKey: .costAmount)  // writes null when nil
-                try container.encode(costPeriod, forKey: .costPeriod)  // writes null when nil
-            }
-        }
-        let payload = Payload(title: title, url: url, notes: notes,
-                              costAmount: costAmount, costPeriod: costPeriod?.rawValue)
-        return try await client
+    func updateTile(id: UUID, _ draft: TileDraft) async throws -> Tile {
+        try await client
             .from("tiles")
-            .update(payload)
+            .update(TilePayload(draft))
             .eq("id", value: id.uuidString)
             .select()
             .single()
@@ -111,5 +70,39 @@ final class SupabaseRepository {
             .delete()
             .eq("id", value: id.uuidString)
             .execute()
+    }
+}
+
+/// Encodable body for tile insert/update. Nil fields are written as explicit
+/// `null` (so clearing a value on edit persists) — synthesized Encodable would
+/// omit them, leaving the old value in place.
+private struct TilePayload: Encodable {
+    let title: String
+    let url: String
+    let notes: String?
+    let costAmount: Double?
+    let costPeriod: String?
+
+    enum CodingKeys: String, CodingKey {
+        case title, url, notes
+        case costAmount = "cost_amount"
+        case costPeriod = "cost_period"
+    }
+
+    init(_ draft: TileDraft) {
+        title = draft.title
+        url = draft.url
+        notes = draft.notes
+        costAmount = draft.costAmount
+        costPeriod = draft.costPeriod?.rawValue
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(title, forKey: .title)
+        try container.encode(url, forKey: .url)
+        try container.encode(notes, forKey: .notes)
+        try container.encode(costAmount, forKey: .costAmount)
+        try container.encode(costPeriod, forKey: .costPeriod)
     }
 }
