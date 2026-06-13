@@ -1,32 +1,51 @@
 //
-//  CreateTileSheet.swift
+//  TileFormSheet.swift
 //  Yona
 //
-//  Form to add a new tile. Title + URL required; notes optional. On save it
-//  inserts the tile and dismisses; on failure it stays open with an error.
+//  One form for both creating and editing a tile. Title + URL required, notes
+//  optional. On save it inserts/updates and dismisses; on failure it stays open.
 //
 
 import SwiftUI
 
-struct CreateTileSheet: View {
+struct TileFormSheet: View {
+    enum Mode {
+        case create
+        case edit(Tile)
+    }
+
+    let mode: Mode
+
     @Environment(TileStore.self) private var tileStore
     @Environment(\.dismiss) private var dismiss
 
-    @State private var title = ""
-    @State private var urlText = ""
-    @State private var notes = ""
+    @State private var title: String
+    @State private var urlText: String
+    @State private var notes: String
     @State private var isSaving = false
     @State private var errorMessage: String?
 
-    private var trimmedTitle: String {
-        title.trimmingCharacters(in: .whitespacesAndNewlines)
+    init(mode: Mode) {
+        self.mode = mode
+        switch mode {
+        case .create:
+            _title = State(initialValue: "")
+            _urlText = State(initialValue: "")
+            _notes = State(initialValue: "")
+        case let .edit(tile):
+            _title = State(initialValue: tile.title)
+            _urlText = State(initialValue: tile.url)
+            _notes = State(initialValue: tile.notes ?? "")
+        }
     }
-    private var trimmedURL: String {
-        urlText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+    private var isEditing: Bool {
+        if case .edit = mode { return true }
+        return false
     }
-    private var canSave: Bool {
-        !trimmedTitle.isEmpty && !trimmedURL.isEmpty && !isSaving
-    }
+    private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var trimmedURL: String { urlText.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var canSave: Bool { !trimmedTitle.isEmpty && !trimmedURL.isEmpty && !isSaving }
 
     var body: some View {
         NavigationStack {
@@ -48,7 +67,7 @@ struct CreateTileSheet: View {
                     }
                 }
             }
-            .navigationTitle("New Tile")
+            .navigationTitle(isEditing ? "Edit Tile" : "New Tile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -73,13 +92,17 @@ struct CreateTileSheet: View {
         errorMessage = nil
         defer { isSaving = false }
 
+        let cleanNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalNotes: String? = cleanNotes.isEmpty ? nil : cleanNotes
+        let finalURL = URLHelpers.normalized(trimmedURL)
+
         do {
-            let cleanNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
-            try await tileStore.create(
-                title: trimmedTitle,
-                url: URLHelpers.normalized(trimmedURL),
-                notes: cleanNotes.isEmpty ? nil : cleanNotes
-            )
+            switch mode {
+            case .create:
+                try await tileStore.create(title: trimmedTitle, url: finalURL, notes: finalNotes)
+            case let .edit(tile):
+                try await tileStore.update(id: tile.id, title: trimmedTitle, url: finalURL, notes: finalNotes)
+            }
             dismiss()
         } catch {
             errorMessage = "Couldn't save this tile. Please try again."

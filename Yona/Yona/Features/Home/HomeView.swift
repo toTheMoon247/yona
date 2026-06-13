@@ -2,9 +2,9 @@
 //  HomeView.swift
 //  Yona
 //
-//  The signed-in home: a 2-column grid of the user's tiles, with loading,
-//  empty, and error states, plus the floating "+" to add a tile.
-//  Detail / edit / search land in later slices.
+//  The signed-in home: a 2-column grid of the user's tiles with loading / empty
+//  / error states, the floating "+" to add a tile, and a per-tile ••• menu for
+//  edit / delete. Search lands in Slice 5.
 //
 
 import SwiftUI
@@ -14,6 +14,8 @@ struct HomeView: View {
     @Environment(TileStore.self) private var tileStore
 
     @State private var showingCreate = false
+    @State private var editingTile: Tile?
+    @State private var pendingDelete: Tile?
 
     private let columns = [
         GridItem(.flexible(), spacing: DesignTokens.Spacing.l),
@@ -25,7 +27,7 @@ struct HomeView: View {
             content
                 .overlay(alignment: .bottomTrailing) { createButton }
                 .navigationDestination(for: Tile.self) { tile in
-                    TileDetailView(tile: tile)
+                    TileDetailView(tileID: tile.id)
                 }
                 .navigationTitle("Yona")
                 .toolbar {
@@ -41,7 +43,22 @@ struct HomeView: View {
                 }
                 .task { await tileStore.load() }
                 .sheet(isPresented: $showingCreate) {
-                    CreateTileSheet()
+                    TileFormSheet(mode: .create)
+                }
+                .sheet(item: $editingTile) { tile in
+                    TileFormSheet(mode: .edit(tile))
+                }
+                .confirmationDialog(
+                    "Delete this tile?",
+                    isPresented: deleteDialogBinding,
+                    presenting: pendingDelete
+                ) { tile in
+                    Button("Delete \(tile.title)", role: .destructive) {
+                        Task { await tileStore.delete(tile) }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: { tile in
+                    Text("\"\(tile.title)\" will be permanently removed.")
                 }
         }
     }
@@ -74,11 +91,35 @@ struct HomeView: View {
                         TileCard(tile: tile)
                     }
                     .buttonStyle(.plain)
+                    .overlay(alignment: .topTrailing) { tileMenu(tile) }
                 }
             }
             .padding(DesignTokens.Spacing.l)
         }
         .refreshable { await tileStore.load() }
+    }
+
+    private func tileMenu(_ tile: Tile) -> some View {
+        Menu {
+            Button {
+                editingTile = tile
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            Button(role: .destructive) {
+                pendingDelete = tile
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.secondary)
+                .frame(width: 30, height: 30)
+                .background(.ultraThinMaterial, in: Circle())
+                .contentShape(Circle())
+        }
+        .padding(DesignTokens.Spacing.s)
     }
 
     private var emptyState: some View {
@@ -115,5 +156,12 @@ struct HomeView: View {
         }
         .padding(DesignTokens.Spacing.l)
         .accessibilityLabel("Add tile")
+    }
+
+    private var deleteDialogBinding: Binding<Bool> {
+        Binding(
+            get: { pendingDelete != nil },
+            set: { if !$0 { pendingDelete = nil } }
+        )
     }
 }

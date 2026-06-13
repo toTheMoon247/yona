@@ -2,22 +2,40 @@
 //  TileDetailView.swift
 //  Yona
 //
-//  Full view of a tile: logo, title, the site (Open Website), and notes.
-//  Edit / delete arrive in Slice 4.
+//  Full view of a tile: logo, title, the site (Open Website), and notes, plus
+//  Edit / Delete. Reads the live tile from the store (by id) so edits reflect
+//  immediately and a delete pops back to Home.
 //
 
 import SwiftUI
 
 struct TileDetailView: View {
-    let tile: Tile
+    let tileID: UUID
+
+    @Environment(TileStore.self) private var tileStore
+    @Environment(\.dismiss) private var dismiss
 
     @State private var showingSafari = false
+    @State private var editing = false
+    @State private var confirmingDelete = false
 
-    private var websiteURL: URL? {
-        URL(string: URLHelpers.normalized(tile.url))
+    private var tile: Tile? {
+        tileStore.tiles.value?.first { $0.id == tileID }
     }
 
     var body: some View {
+        Group {
+            if let tile {
+                detail(tile)
+            } else {
+                // Tile was deleted — leave the screen.
+                Color.clear.onAppear { dismiss() }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func detail(_ tile: Tile) -> some View {
         ScrollView {
             VStack(spacing: DesignTokens.Spacing.l) {
                 LetterTileView(title: tile.title, seed: tile.id.uuidString)
@@ -28,7 +46,7 @@ struct TileDetailView: View {
                     .font(.title.bold())
                     .multilineTextAlignment(.center)
 
-                Text(displayHost)
+                Text(displayHost(tile))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -40,11 +58,11 @@ struct TileDetailView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .disabled(websiteURL == nil)
+                .disabled(websiteURL(tile) == nil)
                 .padding(.horizontal)
 
                 if tile.hasNotes {
-                    notesSection
+                    notesSection(tile)
                 }
 
                 Spacer(minLength: 0)
@@ -54,14 +72,46 @@ struct TileDetailView: View {
         }
         .navigationTitle(tile.title)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showingSafari) {
-            if let websiteURL {
-                SafariView(url: websiteURL).ignoresSafeArea()
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        editing = true
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    Button(role: .destructive) {
+                        confirmingDelete = true
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
+        }
+        .sheet(isPresented: $showingSafari) {
+            if let url = websiteURL(tile) {
+                SafariView(url: url).ignoresSafeArea()
+            }
+        }
+        .sheet(isPresented: $editing) {
+            TileFormSheet(mode: .edit(tile))
+        }
+        .confirmationDialog("Delete this tile?", isPresented: $confirmingDelete) {
+            Button("Delete", role: .destructive) {
+                Task {
+                    await tileStore.delete(tile)
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("\"\(tile.title)\" will be permanently removed.")
         }
     }
 
-    private var notesSection: some View {
+    private func notesSection(_ tile: Tile) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.s) {
             Text("Notes")
                 .font(.headline)
@@ -77,8 +127,12 @@ struct TileDetailView: View {
         )
     }
 
-    private var displayHost: String {
-        guard let host = websiteURL?.host() else { return tile.url }
+    private func websiteURL(_ tile: Tile) -> URL? {
+        URL(string: URLHelpers.normalized(tile.url))
+    }
+
+    private func displayHost(_ tile: Tile) -> String {
+        guard let host = websiteURL(tile)?.host() else { return tile.url }
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 }

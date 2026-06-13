@@ -51,4 +51,29 @@ final class SupabaseRepository {
             .execute()
             .value
     }
+
+    /// Update a tile and return the refreshed row (`updated_at` is bumped by a DB trigger).
+    func updateTile(id: UUID, title: String, url: String, notes: String?) async throws -> Tile {
+        struct Payload: Encodable {
+            let title: String
+            let url: String
+            let notes: String?
+        }
+        return try await client
+            .from("tiles")
+            .update(Payload(title: title, url: url, notes: notes))
+            .eq("id", value: id.uuidString)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
+
+    func deleteTile(id: UUID) async throws {
+        try await client
+            .from("tiles")
+            .delete()
+            .eq("id", value: id.uuidString)
+            .execute()
+    }
 }
