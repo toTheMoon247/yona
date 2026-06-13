@@ -54,10 +54,20 @@ final class SupabaseRepository {
 
     /// Update a tile and return the refreshed row (`updated_at` is bumped by a DB trigger).
     func updateTile(id: UUID, title: String, url: String, notes: String?) async throws -> Tile {
+        // Custom encoder so a nil `notes` is sent as an explicit `null` (clearing the
+        // column) instead of being omitted — synthesized Encodable drops nil optionals,
+        // which would leave the old note in place.
         struct Payload: Encodable {
             let title: String
             let url: String
             let notes: String?
+            enum CodingKeys: String, CodingKey { case title, url, notes }
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encode(title, forKey: .title)
+                try container.encode(url, forKey: .url)
+                try container.encode(notes, forKey: .notes) // writes null when nil
+            }
         }
         return try await client
             .from("tiles")
