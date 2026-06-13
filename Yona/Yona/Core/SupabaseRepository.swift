@@ -115,6 +115,13 @@ final class SupabaseRepository {
             .execute()
             .value
     }
+
+    /// A short-lived signed URL to download a stored file.
+    func signedURL(for storagePath: String, expiresIn: Int = 3600) async throws -> URL {
+        try await client.storage
+            .from("documents")
+            .createSignedURL(path: storagePath, expiresIn: expiresIn)
+    }
 }
 
 /// Encodable body for tile insert/update. Nil fields are written as explicit

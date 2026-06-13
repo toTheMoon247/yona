@@ -9,6 +9,7 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import QuickLook
 
 struct AttachmentsView: View {
     let tileID: UUID
@@ -18,6 +19,8 @@ struct AttachmentsView: View {
     @State private var attachments: LoadState<[Attachment]> = .idle
     @State private var isImporting = false
     @State private var isUploading = false
+    @State private var openingID: UUID?
+    @State private var previewURL: URL?
     @State private var errorMessage: String?
 
     var body: some View {
@@ -59,6 +62,7 @@ struct AttachmentsView: View {
         ) { result in
             handleImport(result)
         }
+        .quickLookPreview($previewURL)
     }
 
     @ViewBuilder
@@ -84,16 +88,28 @@ struct AttachmentsView: View {
     }
 
     private func row(_ attachment: Attachment) -> some View {
-        HStack(spacing: DesignTokens.Spacing.m) {
-            Image(systemName: "doc.fill").foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(attachment.filename).lineLimit(1)
-                if let size = attachment.displaySize {
-                    Text(size).font(.caption).foregroundStyle(.secondary)
+        Button {
+            Task { await open(attachment) }
+        } label: {
+            HStack(spacing: DesignTokens.Spacing.m) {
+                Image(systemName: "doc.fill").foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(attachment.filename).lineLimit(1).foregroundStyle(.primary)
+                    if let size = attachment.displaySize {
+                        Text(size).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+                if openingID == attachment.id {
+                    ProgressView()
+                } else {
+                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
                 }
             }
-            Spacer()
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .disabled(openingID != nil)
         .padding(.vertical, 2)
     }
 
@@ -103,6 +119,26 @@ struct AttachmentsView: View {
             attachments = .loaded(try await repository.fetchAttachments(tileID: tileID))
         } catch {
             attachments = .failed(error)
+        }
+    }
+
+    private func open(_ attachment: Attachment) async {
+        errorMessage = nil
+        openingID = attachment.id
+        defer { openingID = nil }
+        do {
+            let signed = try await repository.signedURL(for: attachment.storagePath)
+            let (data, _) = try await URLSession.shared.data(from: signed)
+            let fileURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(attachment.filename)
+            try data.write(to: fileURL, options: .atomic)
+            previewURL = fileURL
+        } catch {
+            #if DEBUG
+            errorMessage = "Couldn't open: \(error)"
+            #else
+            errorMessage = "Couldn't open this document."
+            #endif
         }
     }
 
