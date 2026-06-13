@@ -161,4 +161,4 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 
 **Where we are.** Yona is now a full-featured personal vault: search-to-add accounts, costs, recurring renewal dates, sorting, and document storage — all on a real phone. The only thing left before sharing it with others is the Apple side.
 
-**Next steps.** Once Apple approves the developer account: Apple sign-in + TestFlight (so other people can try it).
+**Next task (next day): the cost breakdown screen.** Tap the monthly total on the home screen to open a screen that lists every account with a cost, shows what each one costs per month, and the running total — so you can see exactly where the spend goes. (Apple sign-in + TestFlight is still waiting on the developer-account approval.)
