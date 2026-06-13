@@ -84,3 +84,19 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The app now looks the part — it matches the original mockup. Sign in, add accounts, and see real logos, all working.
 
 **Next steps (next day).** A polish pass — smooth out the loading and empty screens, add an app icon, and improve accessibility — to get it feeling fully finished.
+
+---
+
+## Day 6 — 2026-06-13
+
+**Today.** A polish pass — the app is now feature-complete for its first version.
+
+- **Smoother and snappier.** Added a gentle loading placeholder, smooth animations when tiles are added or removed, and a success buzz (on a real phone) when you save or delete.
+- **Instant open.** The app now remembers your accounts on the device, so it opens straight to your grid instead of loading from scratch — and it still shows them even with no internet.
+- **App icon.** Yona now has its own icon — the clean blue grid that matches the logo inside the app.
+- **Easier for everyone.** Improved support for VoiceOver (the screen reader) so the app is more accessible.
+- **Saved our feature-complete version** — everything planned for the first release is now built.
+
+**Where we are.** The app is done in terms of features: sign in, keep your accounts with real logos, search, all in a polished, fast experience.
+
+**Next steps (next day).** The final stretch — set up Apple sign-in and get the app onto TestFlight so real people can try it. This is the part that needs the paid Apple developer account.

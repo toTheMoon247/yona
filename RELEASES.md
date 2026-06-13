@@ -4,6 +4,19 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.4.0 — MVP feature-complete · 2026-06-13
+
+Polish pass — every feature in the MVP scope is now built.
+
+- **Motion:** loading skeleton, animated tile add/remove, success haptics.
+- **Instant home:** on-disk per-user cache renders the grid immediately on cold
+  launch and survives offline; refreshes from the network.
+- **App icon** — the blue 2×2 grid, matching the in-app logo.
+- **Accessibility:** VoiceOver labels on tiles and the per-tile menu.
+
+Built so far: auth, tile CRUD + search, logos, polish. Remaining before the App
+Store: Apple Sign-In + TestFlight (Phase 5, needs Apple Developer enrollment).
+
 ## v0.3.0 — Logos · 2026-06-13
 
 Real brand logos replace the letter-tile placeholders.

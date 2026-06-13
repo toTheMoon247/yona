@@ -92,4 +92,4 @@ Tracked here so nothing is forgotten. Order TBD.
 
 ## Status
 
-**Phase 3 complete** — real Brandfetch logos with letter-tile fallback + disk caching, verified on device, CI green; tagged **`v0.3.0 — Logos`**. **Now entering Phase 4 — Polish, Slice 1.** See `project-manager-log.md` for the running journal.
+**Phase 4 complete** — polish (motion, instant on-disk cache, app icon, accessibility), CI green; tagged **`v0.4.0 — MVP feature-complete`**. **Now entering Phase 5 — Apple Sign-In & Beta** (gated on Apple Developer Program enrollment). See `project-manager-log.md` for the running journal.
