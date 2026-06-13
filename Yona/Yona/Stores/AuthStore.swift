@@ -73,7 +73,12 @@ final class AuthStore {
             // `authStateChanges` flips `sessionState` to .signedIn.
         } catch {
             if isUserCancellation(error) { return }
+            #if DEBUG
+            print("Google sign-in error:", error)
+            errorMessage = "Sign-in failed: \(error)"
+            #else
             errorMessage = "Sign-in failed. Please try again."
+            #endif
         }
     }
 
