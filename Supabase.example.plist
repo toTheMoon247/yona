@@ -11,6 +11,8 @@
     (no /rest/v1 suffix — the client adds it). Plain URL, no xcconfig $() trick needed.
   - SUPABASE_ANON_KEY: the anon / publishable key (safe to ship; RLS guards data).
     Do NOT use the service_role / secret key.
+  - BRANDFETCH_CLIENT_ID: Brandfetch Logo API client ID (public-by-design). Leave
+    as-is to fall back to letter-tiles. Get one free at brandfetch.com/developers.
 -->
 <plist version="1.0">
 <dict>
@@ -18,5 +20,7 @@
 	<string>https://YOUR-REF.supabase.co</string>
 	<key>SUPABASE_ANON_KEY</key>
 	<string>your-anon-or-publishable-key</string>
+	<key>BRANDFETCH_CLIENT_ID</key>
+	<string>YOUR-BRANDFETCH-CLIENT-ID</string>
 </dict>
 </plist>

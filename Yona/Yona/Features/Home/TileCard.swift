@@ -12,7 +12,7 @@ struct TileCard: View {
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.s) {
-            LetterTileView(title: tile.title, seed: tile.id.uuidString)
+            TileLogoView(title: tile.title, seed: tile.id.uuidString, websiteURL: tile.url)
                 .frame(width: 56, height: 56)
                 .padding(.top, DesignTokens.Spacing.s)
 

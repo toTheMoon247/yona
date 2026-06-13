@@ -2,18 +2,13 @@
 //  AppConfig.swift
 //  Yona
 //
-//  Reads backend configuration from a bundled, git-ignored `Supabase.plist`
-//  (template: Supabase.example.plist at the repo root). The file ships inside
-//  the app but is never committed — RLS is what actually guards the data.
+//  Reads configuration from a bundled, git-ignored `Supabase.plist` (template:
+//  Supabase.example.plist at the repo root). The file ships inside the app but
+//  is never committed — RLS guards the data; the Brandfetch ID is public-by-design.
 //
 
 import Foundation
 
-/// Static app configuration resolved once at launch.
-///
-/// When `Supabase.plist` is missing or still has placeholder values (e.g. on CI,
-/// where it's git-ignored), we fall back to a syntactically-valid placeholder so
-/// the app still builds and launches; `isConfigured` is then `false`.
 struct AppConfig {
     let supabaseURL: URL
     let supabaseAnonKey: String
@@ -21,16 +16,23 @@ struct AppConfig {
     /// `false` until a real `Supabase.plist` is present.
     let isConfigured: Bool
 
+    /// Brandfetch Logo API client ID; nil when unset (logos fall back to letter-tiles).
+    let brandfetchClientID: String?
+
     static let shared = AppConfig()
 
     init(bundle: Bundle = .main) {
         var urlString = ""
         var key = ""
+        var brandfetch: String?
 
         if let plistURL = bundle.url(forResource: "Supabase", withExtension: "plist"),
            let dict = NSDictionary(contentsOf: plistURL) {
             urlString = (dict["SUPABASE_URL"] as? String) ?? ""
             key = (dict["SUPABASE_ANON_KEY"] as? String) ?? ""
+            let bf = ((dict["BRANDFETCH_CLIENT_ID"] as? String) ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            brandfetch = (bf.isEmpty || bf.contains("YOUR-")) ? nil : bf
         }
 
         urlString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -47,5 +49,7 @@ struct AppConfig {
             supabaseAnonKey = "placeholder-anon-key"
             isConfigured = false
         }
+
+        brandfetchClientID = brandfetch
     }
 }
