@@ -91,7 +91,29 @@ default + per-tile override).
 - Open Qs: recurring dates (monthly/yearly) should auto-advance after each
   renewal; multiple reminders per tile; per-device scheduling from synced data.
 
-## 6. Sort / arrange tiles  _(idea)_
+## 7. Service search / smart add  _(idea — strong; largely supersedes #3)_
+
+Instead of pasting a URL + typing a title, **search for a service by name** and
+auto-fill everything.
+
+- Type "netflix" → results list (logo + name + domain) → tap → title, URL, and
+  logo auto-fill, **all still editable**.
+- Powered by **Brandfetch's Brand Search API** — reachable with our existing
+  client ID, and (per earlier research) in the **free tier** alongside the Logo
+  API. Verify the exact endpoint + result quality before building.
+- **Disambiguation** (the "Apple" problem): show matching brands as a **list**
+  and let the user pick (apple.com vs icloud.com vs tv.apple.com). Keep fields
+  editable after auto-fill, so they can pick "Apple" and rename to "Apple iCloud"
+  while keeping the logo (logo follows the chosen domain).
+- **Always keep a manual fallback** ("Can't find it / no website") → today's
+  title + URL form, for niche brands, offline services, and custom records.
+  Search OR manual, never search-only.
+- This is the best implementation of the Title/URL rethink (**#3**) — fold #3
+  into here. Effort: moderate (search UI + debounce + create-flow rework).
+
+Open Qs: debounce timing; number of results; canonical name vs typed query.
+
+## 6. Sort / arrange tiles  _(✅ shipped — v0.4.2)_
 
 A sort option on the Home grid — notably **by due date** (soonest renewal first)
 so upcoming charges float to the top.
