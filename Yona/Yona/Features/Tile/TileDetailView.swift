@@ -56,7 +56,7 @@ struct TileDetailView: View {
             }
         }
         .sheet(isPresented: $editing) {
-            TileFormSheet(mode: .edit(tile))
+            TileFormSheet(tile: tile)
         }
         .confirmationDialog("Delete this tile?", isPresented: $confirmingDelete) {
             Button("Delete", role: .destructive) {

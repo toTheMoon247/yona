@@ -57,10 +57,10 @@ struct HomeView: View {
                 }
                 .task { await tileStore.load() }
                 .sheet(isPresented: $showingCreate) {
-                    TileFormSheet(mode: .create)
+                    AddTileFlow()
                 }
                 .sheet(item: $editingTile) { tile in
-                    TileFormSheet(mode: .edit(tile))
+                    TileFormSheet(tile: tile)
                 }
                 .confirmationDialog(
                     "Delete this tile?",
