@@ -4,6 +4,16 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.4.2 — Renewal dates · 2026-06-13
+
+Phase 6: an optional renewal/due date per tile (with cost tracking, Yona is now
+a lightweight subscription tracker).
+
+- Optional **renewal date** in the form (toggle + date picker); shown on detail
+  as "Renews <date> · in N days". (DB migration `0002_renewal_date.sql`.)
+- Home **sort menu**: recently added / due date / name / cost (persisted).
+- Plus an internal cleanup (TileDraft + detail-view split) — lint clean.
+
 ## v0.4.1 — Polish & cost tracking · 2026-06-13
 
 Post-MVP refinements (mostly from using it on a real device) plus a new feature.

@@ -83,7 +83,7 @@ _Milestone: **`v0.5.0 — Beta`**. `v1.0.0` reserved for App Store launch._
 Built opportunistically after the MVP. Statuses reflect current intent; see
 `docs/roadmap.md` for the product reasoning.
 
-### Phase 6 — Renewal Dates & Sorting  _(in progress)_
+### Phase 6 — Renewal Dates & Sorting  _(✅ complete — v0.4.2)_
 **Goal:** an optional renewal/due date per tile, surfaced and sortable.
 - **Slice 1 — The field.** `renewal_date` column; `renewalDate` on `Tile` + `TileDraft`; an optional `DatePicker` in the form; show the date on the detail screen.
 - **Slice 2 — Sort & surface.** Home sort menu (due date / name / recently added / cost); "renews in N days" hint.
@@ -103,4 +103,4 @@ Title/URL model rethink (roadmap #3), Family Vault, Emergency Access, plus categ
 
 ## Status
 
-**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Building Phase 6 — Renewal Dates** in the meantime; Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.
+**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Phase 6 — Renewal Dates complete** (tagged `v0.4.2`). Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.

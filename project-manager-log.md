@@ -117,3 +117,18 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** A polished app running on a real phone, now with cost tracking. Still pre-beta.
 
 **Next steps (next day).** A small code tidy-up, then the final stretch — Apple sign-in + TestFlight once the Apple developer account is sorted.
+
+---
+
+## Day 8 — 2026-06-13
+
+**Today.** Started the Apple developer account, tidied the code, and added renewal-date tracking.
+
+- **Apple account.** Enrolled in Apple's (paid) developer program — the one needed for TestFlight and the App Store. Submitted; **pending approval**. Also got the app running on a real iPhone for free in the meantime.
+- **Tidied the code.** A behind-the-scenes cleanup so the project stays neat and future features are easier to add — no change to how the app works.
+- **Renewal dates (new).** Any account can now have an optional renewal/due date. The home screen can sort by it (so upcoming renewals float to the top), and each tile shows "Renews <date> · in N days." Together with the cost field, Yona is now a handy little subscription tracker.
+- **Saved a checkpoint** capturing the renewal-date work.
+
+**Where we are.** A polished app on a real phone that tracks your accounts, their costs, and their renewal dates. Apple approval is pending.
+
+**Next steps.** Once Apple approves: turn on "Sign in with Apple" and get the app onto TestFlight. (Reminders and document attachments are planned but parked for now.)
