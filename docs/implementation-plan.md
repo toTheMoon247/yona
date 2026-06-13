@@ -74,7 +74,7 @@ _Milestone: **`v0.4.0 — MVP feature-complete`**._
 - **Slice 1 — Enroll & flip Apple.** Enroll in the Apple Developer Program ($99/yr); add the Sign in with Apple capability; replace the stub with real `ASAuthorizationController` sign-in; enable the Apple provider in Supabase.
 - **Slice 2 — TestFlight.** First signed build, App Store Connect setup, TestFlight beta with real users.
 
-_Milestone: **`v0.5.0 — Beta`**. `v1.0.0` reserved for App Store launch._
+_Milestone: **`v0.6.0 — Beta`** (was v0.5.0; that became the Documents release). `v1.0.0` reserved for App Store launch._
 
 ---
 
@@ -92,7 +92,7 @@ Built opportunistically after the MVP. Statuses reflect current intent; see
 **Goal:** notify the user before a renewal, at a user-chosen lead time.
 Local notifications (no server / no APNs — **not gated on the paid Apple program**), permission flow, per-tile scheduling, configurable lead time (day-of / 1 day / 3 days / week), auto-advance for recurring dates, reschedule/cancel on edit/delete. Depends on Phase 6's date field.
 
-### Phase 8 — Document Attachments  _(next)_
+### Phase 8 — Document Attachments  _(✅ complete — v0.5.0)_
 **Goal:** attach/view/delete documents on a tile, managed on the **Detail** screen.
 
 **Storage decision (2026-06-14):** **Supabase Storage, baseline** — private bucket
@@ -118,4 +118,4 @@ Title/URL model rethink (roadmap #3), Family Vault, Emergency Access, plus categ
 
 ## Status
 
-**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Phase 6 — Renewal Dates complete + post-MVP feature work** (service search, two-step add flow, recurring renewals), tagged through **`v0.4.3`**. Phases 7 (Reminders) and 8 (Documents) are on hold. See `project-manager-log.md`.
+**Phases 0–4 complete + post-MVP polish & cost tracking**, tagged through **`v0.4.1`**. **Phase 5 — Apple Sign-In & Beta is on hold pending Apple Developer Program enrollment** (currently *Pending*). **Phase 8 (Documents) complete** — tagged **`v0.5.0`**. Every non-Apple-gated feature is built (cost, renewals + recurrence, sort, service search, two-step add, documents). **Phase 5 — Apple Sign-In & Beta (now `v0.6.0`) on hold pending Apple enrollment.** Phase 7 (Reminders) + smaller ideas (#8–11) remain. See `project-manager-log.md`.

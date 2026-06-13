@@ -147,3 +147,18 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** Yona is a polished subscription/account tracker on a real phone — easy to add to, with costs and recurring renewal dates. Apple approval still pending.
 
 **Next steps.** Once Apple approves: Apple sign-in + TestFlight. (Reminders and document attachments still parked.)
+
+---
+
+## Day 10 — 2026-06-14
+
+**Today.** Added document attachments — the last big feature that didn't need Apple.
+
+- **Attach files to an account.** Open any account and attach documents to it (insurance PDFs, statements, contracts…), up to 25 MB each.
+- **View them in the app.** Tap a document and it opens full-screen to read, with a share button.
+- **Remove them.** Long-press a document to delete it; deleting an account also cleans up its files.
+- **Saved a new milestone version** — a bigger checkpoint capping all the recent feature work.
+
+**Where we are.** Yona is now a full-featured personal vault: search-to-add accounts, costs, recurring renewal dates, sorting, and document storage — all on a real phone. The only thing left before sharing it with others is the Apple side.
+
+**Next steps.** Once Apple approves the developer account: Apple sign-in + TestFlight (so other people can try it).

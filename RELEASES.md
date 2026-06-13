@@ -4,6 +4,20 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+## v0.5.0 — Documents · 2026-06-14
+
+Attach documents to a tile — and the cap on a big run of post-MVP features.
+
+- **Document attachments** (Phase 8): attach files to a tile (any type, 25 MB),
+  open them in-app (QuickLook via signed URL), delete a single file, and sweep a
+  tile's files when the tile is deleted. **Baseline Supabase Storage** (private
+  bucket + RLS + at-rest encryption; no iCloud / no client-side E2E).
+- Caps the post-`v0.4.0` run (cost tracking, renewal dates + recurrence, sort,
+  service search, two-step add — `v0.4.1`–`v0.4.3`).
+
+Every roadmap feature that doesn't need the Apple Developer account is now built.
+Remaining: Apple Sign-In + TestFlight (now targeted at `v0.6.0`).
+
 ## v0.4.3 — Smart add & recurring renewals · 2026-06-13
 
 - **Service search:** type a brand name → pick from results (logo + name + domain)
