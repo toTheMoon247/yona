@@ -2,8 +2,8 @@
 //  TileStore.swift
 //  Yona
 //
-//  Owns the tile list for the UI. Skeleton for Phase 0; fetch/create/update/
-//  delete/search are implemented in Phase 2.
+//  Owns the tile list for the UI. Slice 1: load + render. Create/update/delete
+//  arrive in later Phase 2 slices.
 //
 
 import Foundation
@@ -20,9 +20,16 @@ final class TileStore {
         self.repository = repository
     }
 
-    // Phase 2:
-    //   func load() async
-    //   func create(_ draft: TileDraft) async
-    //   func update(_ tile: Tile) async
-    //   func delete(_ tile: Tile) async
+    /// Load the user's tiles. Shows a spinner only on the first load; a refresh
+    /// keeps the current list visible (pull-to-refresh has its own indicator).
+    func load() async {
+        if tiles.value == nil {
+            tiles = .loading
+        }
+        do {
+            tiles = .loaded(try await repository.fetchTiles())
+        } catch {
+            tiles = .failed(error)
+        }
+    }
 }

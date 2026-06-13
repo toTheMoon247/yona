@@ -20,7 +20,7 @@ struct ContentView: View {
             case .signedOut:
                 SignInScreen()
             case .signedIn:
-                HomePlaceholderView()
+                HomeView()
             }
         }
         .animation(.default, value: auth.sessionState)
