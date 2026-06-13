@@ -18,7 +18,7 @@ Phase plan / DESIGN §12.
 
 ---
 
-## 2. Optional cost tracking  _(idea — low effort, high value)_
+## 2. Optional cost tracking  _(✅ shipped — v0.4.1)_
 
 An optional cost field per tile (amount + cadence: monthly / yearly). Empty =
 no cost.
@@ -57,7 +57,7 @@ Cost: small — `url` nullable, an auto-suggest helper, hide Open-Website when e
 
 ---
 
-## 4. Modern tile actions  _(open decision; small to build)_
+## 4. Modern tile actions  _(✅ shipped — v0.4.1: long-press context menu)_
 
 **Today:** Edit/Delete via a visible ••• button on each grid tile.
 
@@ -72,6 +72,37 @@ the tile; long-press reveals Edit/Delete; the ••• disappears → cleaner t
   iOS convention and Edit/Delete still living on the detail screen.
 
 Small change; directly polishes the current redesign.
+
+---
+
+## 5. Renewal reminders  _(idea)_
+
+Notify the user before a subscription/service renews, with **user-chosen timing**
+(on the due day, 1 day before, 3 days, a week — configurable, maybe a global
+default + per-tile override).
+
+- Needs a new optional **renewal / next-due date** per tile (pairs naturally with
+  cost tracking #2 → Yona becomes a lightweight subscription manager).
+- **Likely local notifications** scheduled on-device from the known date — *no
+  server / APNs needed*, so this is **not gated on the paid Apple program** (the
+  app just needs notification permission). Simpler than push.
+- This is the concrete design for the "Reminders" Future/Pro item (renewals,
+  passport expiration, etc.).
+- Open Qs: recurring dates (monthly/yearly) should auto-advance after each
+  renewal; multiple reminders per tile; per-device scheduling from synced data.
+
+## 6. Sort / arrange tiles  _(idea)_
+
+A sort option on the Home grid — notably **by due date** (soonest renewal first)
+so upcoming charges float to the top.
+
+- Needs the same **renewal/due date** field as #5.
+- Make it a general sort menu: due date · name (A–Z) · recently added · cost —
+  with due-date as the headline option.
+- Could surface "renews in X days" on the tile or detail.
+
+> **Shared foundation:** #5 and #6 both depend on adding an optional
+> **renewal/due date** to a tile. Build that field once, then both layer on top.
 
 ---
 
