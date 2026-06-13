@@ -92,9 +92,24 @@ Built opportunistically after the MVP. Statuses reflect current intent; see
 **Goal:** notify the user before a renewal, at a user-chosen lead time.
 Local notifications (no server / no APNs — **not gated on the paid Apple program**), permission flow, per-tile scheduling, configurable lead time (day-of / 1 day / 3 days / week), auto-advance for recurring dates, reschedule/cancel on edit/delete. Depends on Phase 6's date field.
 
-### Phase 8 — Document Attachments  _(on hold)_
-**Goal:** upload/store/view/delete documents on a tile.
-Schema already reserved (`attachments` table + `documents` bucket + RLS). App work: `fileImporter`, 25 MB cap, upload to Storage, signed-URL + QuickLook view, single-attachment delete, tile-delete folder sweep, "N docs" indicator. The heaviest of the post-MVP items.
+### Phase 8 — Document Attachments  _(next)_
+**Goal:** attach/view/delete documents on a tile, managed on the **Detail** screen.
+
+**Storage decision (2026-06-14):** **Supabase Storage, baseline** — private bucket
++ RLS + provider-side at-rest encryption. *Not* iCloud, *not* client-side/E2E
+encryption (the crypto is cheap but key-management + no-recovery UX isn't worth it
+now, and E2E would make Family Vault sharing hard). Revisit only if "even we can't
+read your files" becomes a headline feature.
+
+- **Slice 1 — Attach & list.** `Attachment` model + repository (list/upload);
+  `fileImporter`; 25 MB client cap; upload to `documents/{user_id}/{tile_id}/{uuid}-{name}`;
+  insert row; "Attachments" section on Detail.
+- **Slice 2 — Open / preview.** Signed URL → download to temp → QuickLook.
+- **Slice 3 — Delete & cleanup.** Remove Storage object + row; sweep the tile's
+  Storage folder on tile delete (cascade drops rows, not files); "N docs" count on Home.
+
+Schema (`attachments` table + `documents` bucket + storage RLS) is already in
+`schema.sql` — verify the bucket/policies exist and work on the first upload.
 
 ### Further ideas (not yet phased)
 Title/URL model rethink (roadmap #3), Family Vault, Emergency Access, plus categories / folders / password management / AI / offline — see `docs/roadmap.md`.

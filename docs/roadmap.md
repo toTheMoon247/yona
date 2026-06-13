@@ -14,7 +14,8 @@ first release simple; **highest-priority** future feature.
 
 Status: the database schema (`attachments` table + private `documents` bucket +
 RLS) is already shipped and reserved, so this is largely app-code work. See the
-Phase plan / DESIGN §12.
+Phase plan / DESIGN §12. **Storage decided (2026-06-14): Supabase baseline**
+(private bucket + RLS + at-rest encryption; no iCloud, no client-side E2E).
 
 ---
 
