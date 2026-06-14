@@ -1,12 +1,20 @@
-name: CI
+name: iOS CI
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Yona/**'
+      - 'supabase/**'
+      - '.github/workflows/ios.yml'
   pull_request:
+    paths:
+      - 'Yona/**'
+      - 'supabase/**'
+      - '.github/workflows/ios.yml'
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ios-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
