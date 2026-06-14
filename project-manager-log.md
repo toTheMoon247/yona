@@ -63,14 +63,11 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 
 ## Day 4 — 2026-06-14
 
-**Today.** Decided to build an Android version of Yona, and set up the project so the iPhone app and the new Android app live together in one tidy home.
+**Today.** Started building an Android version of Yona, so it works on Android phones too — not just iPhone.
 
-- **New direction: an Android app.** Yona will now also run on Android phones, sharing the exact same cloud backend (accounts, logos, documents) as the iPhone app — so a person's data is the same on either phone. The iPhone app is untouched.
-- **One shared home for both apps.** Rather than juggle two separate projects, both apps now live side by side in the same place, with the automatic quality checks taught to test each app only when its own files change (so Android work never disturbs the iPhone app and vice-versa).
-- **Created the Android starter project** and confirmed it builds cleanly, both on the laptop and through the automatic checks online — green on both apps.
+- Set things up so both apps live together neatly without getting in each other's way.
+- Built the Android app's foundation and connected it to the same backend as the iPhone app, so both share the same accounts and data. Got it running on an Android test phone.
 
-> **Safe rollback point.** The last fully-working, shippable version of the iPhone app *before* any of this Android/restructuring work is **v0.5.0 (Documents)**. If anything in the restructure ever needs undoing, that's the known-good version to return to.
+**Where we are.** The iPhone app is finished and safely saved (version v0.5.0 — the point to return to if anything ever needs undoing). The Android app is just getting started: the groundwork is in place, but it has no features yet.
 
-**Where we are.** The iPhone app is complete and safely saved at v0.5.0. The groundwork for Android is in place — the starter app builds and passes checks — but it has no features yet (just a blank starter screen). Building Android for real is next.
-
-**Next steps (next day).** Start building the Android app feature-by-feature, mirroring the iPhone version: first connect it to the cloud and stand up the basic shell, then "Sign in with Google," then the home screen of account tiles, then logos — the same order we built the iPhone app.
+**Next steps (next day).** Add "Sign in with Google" to the Android app — its first real feature — reusing the login we already set up for iPhone.
