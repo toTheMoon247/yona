@@ -27,15 +27,35 @@ object TileRepository {
     suspend fun createTile(draft: TileDraft): Tile =
         Supabase.client.postgrest
             .from("tiles")
-            .insert(TileInsert(title = draft.title, url = draft.url, notes = draft.notes)) {
+            .insert(TilePayload(draft)) {
                 select(columns)
             }
             .decodeSingle<Tile>()
+
+    /** Update a tile and return the refreshed row (updated_at is bumped by a DB trigger). */
+    suspend fun updateTile(id: String, draft: TileDraft): Tile =
+        Supabase.client.postgrest
+            .from("tiles")
+            .update(TilePayload(draft)) {
+                select(columns)
+                filter { eq("id", id) }
+            }
+            .decodeSingle<Tile>()
+
+    suspend fun deleteTile(id: String) {
+        Supabase.client.postgrest
+            .from("tiles")
+            .delete {
+                filter { eq("id", id) }
+            }
+    }
 }
 
 @Serializable
-private data class TileInsert(
+private data class TilePayload(
     val title: String,
     val url: String,
     val notes: String?,
-)
+) {
+    constructor(draft: TileDraft) : this(draft.title, draft.url, draft.notes)
+}

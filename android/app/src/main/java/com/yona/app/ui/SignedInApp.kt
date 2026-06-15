@@ -6,7 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.yona.app.core.LoadState
 import com.yona.app.core.Tile
+import com.yona.app.core.TileStore
 
 /**
  * The signed-in app shell + lightweight navigation. Home is the root; Add and
@@ -17,16 +19,30 @@ import com.yona.app.core.Tile
 fun SignedInApp(modifier: Modifier = Modifier) {
     var showAdd by remember { mutableStateOf(false) }
     var detailTile by remember { mutableStateOf<Tile?>(null) }
+    var editTile by remember { mutableStateOf<Tile?>(null) }
 
+    val editing = editTile
     val tile = detailTile
     when {
-        showAdd -> AddTileScreen(
+        editing != null -> TileFormScreen(
+            existing = editing,
+            onDismiss = { editTile = null },
+            onSaved = {
+                // Return to the detail screen with the refreshed tile.
+                detailTile = (TileStore.tiles as? LoadState.Loaded)?.value
+                    ?.firstOrNull { it.id == editing.id }
+                editTile = null
+            },
+        )
+        showAdd -> TileFormScreen(
+            existing = null,
             onDismiss = { showAdd = false },
             onSaved = { showAdd = false },
         )
         tile != null -> TileDetailScreen(
             tile = tile,
             onBack = { detailTile = null },
+            onEdit = { editTile = tile },
         )
         else -> HomeScreen(
             onAddClick = { showAdd = true },

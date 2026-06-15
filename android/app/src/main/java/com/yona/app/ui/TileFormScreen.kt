@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -29,23 +30,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.yona.app.core.Tile
 import com.yona.app.core.TileDraft
 import com.yona.app.core.TileStore
 import com.yona.app.core.UrlHelpers
 import kotlinx.coroutines.launch
 
+/**
+ * Create (existing == null) or edit (existing != null) a tile. Reuses one form
+ * for both, mirroring the iOS shared form.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTileScreen(onDismiss: () -> Unit, onSaved: () -> Unit) {
+fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val editing = existing != null
 
-    var title by rememberSaveable { mutableStateOf("") }
-    var url by rememberSaveable { mutableStateOf("") }
-    var notes by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf(existing?.title ?: "") }
+    var url by rememberSaveable { mutableStateOf(existing?.url ?: "") }
+    var notes by rememberSaveable { mutableStateOf(existing?.notes ?: "") }
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -62,7 +68,12 @@ fun AddTileScreen(onDismiss: () -> Unit, onSaved: () -> Unit) {
                 url = UrlHelpers.normalized(url),
                 notes = notes.trim().ifBlank { null },
             )
-            TileStore.create(draft).fold(
+            val result = if (existing != null) {
+                TileStore.update(existing.id, draft)
+            } else {
+                TileStore.create(draft)
+            }
+            result.fold(
                 onSuccess = { onSaved() },
                 onFailure = {
                     error = it.message ?: "Couldn't save. Please try again."
@@ -75,7 +86,7 @@ fun AddTileScreen(onDismiss: () -> Unit, onSaved: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add account") },
+                title = { Text(if (editing) "Edit account" else "Add account") },
                 navigationIcon = {
                     IconButton(onClick = onDismiss, enabled = !saving) {
                         Icon(Icons.Default.Close, contentDescription = "Close")

@@ -25,4 +25,15 @@ object TileStore {
         runCatching { TileRepository.createTile(draft) }
             .onSuccess { load() }
             .map { }
+
+    /** Update a tile, then refresh the list. */
+    suspend fun update(id: String, draft: TileDraft): Result<Unit> =
+        runCatching { TileRepository.updateTile(id, draft) }
+            .onSuccess { load() }
+            .map { }
+
+    /** Delete a tile, then refresh the list. */
+    suspend fun delete(id: String): Result<Unit> =
+        runCatching { TileRepository.deleteTile(id) }
+            .onSuccess { load() }
 }
