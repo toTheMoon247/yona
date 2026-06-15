@@ -23,7 +23,7 @@ fun AuthGate(modifier: Modifier = Modifier) {
 
     when (status) {
         is SessionStatus.Initializing -> LoadingScreen(modifier)
-        is SessionStatus.Authenticated -> HomePlaceholderScreen(modifier)
+        is SessionStatus.Authenticated -> HomeScreen(modifier)
         is SessionStatus.NotAuthenticated,
         is SessionStatus.RefreshFailure -> SignInScreen(modifier)
     }
