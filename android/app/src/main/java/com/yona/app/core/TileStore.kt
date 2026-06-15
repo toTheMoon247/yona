@@ -19,4 +19,10 @@ object TileStore {
             onFailure = { LoadState.Failed(it.message ?: "Couldn't load your accounts.") },
         )
     }
+
+    /** Create a tile, then refresh the list so it appears on Home. */
+    suspend fun create(draft: TileDraft): Result<Unit> =
+        runCatching { TileRepository.createTile(draft) }
+            .onSuccess { load() }
+            .map { }
 }
