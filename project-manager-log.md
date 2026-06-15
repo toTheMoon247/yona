@@ -71,3 +71,18 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The iPhone app is finished and safely saved (version v0.5.0 — the point to return to if anything ever needs undoing). The Android app is just getting started: the groundwork is in place, but it has no features yet.
 
 **Next steps (next day).** Add "Sign in with Google" to the Android app — its first real feature — reusing the login we already set up for iPhone.
+
+---
+
+## Day 5 — 2026-06-15
+
+**Today.** Took the Android app from "just a shell" to genuinely usable — you can now log in and manage your accounts on Android, just like on iPhone.
+
+- **Login works on Android.** Added "Sign in with Google" (stays logged in between uses; "Sign in with Apple" is a placeholder, same as iPhone). Saved as Android's first official version.
+- **The accounts screen works on Android.** Built the home screen of account tiles — add, view, edit, delete, and search — the same core as the iPhone app. Saved as the second Android version.
+- **Both apps stay in sync.** Because they share the same backend, an account added on one phone shows up on the other.
+- **Wrote down the full Android plan** so the remaining steps (logos, polish, then matching the iPhone's extra features) are laid out.
+
+**Where we are.** The iPhone app is finished and saved (v0.5.0). The Android app now has login plus the full accounts screen working on a test phone. It still shows simple colored-letter placeholders instead of real brand logos.
+
+**Next steps (next day).** Add real brand logos to the Android app (Netflix, Spotify, and so on), with a clean fallback when a logo isn't found — after which the Android app will look like the finished iPhone app.
