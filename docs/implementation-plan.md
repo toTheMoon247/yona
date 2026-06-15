@@ -2,6 +2,9 @@
 
 _Phase-by-phase task breakdown. **Confirm the current phase here before starting work.** Last updated: 2026-06-11._
 
+> **This document covers the iOS app.** The Android app (Kotlin + Jetpack Compose,
+> same Supabase backend) has its own plan — see [`android-plan.md`](android-plan.md).
+
 Work is organized into **phases** (major capability areas) made of **slices** — each slice is a thin vertical cut that builds, runs, and is testable on its own, so the app is always in a demoable state. Milestone tags (`v0.MINOR.0`, per the Yentl convention) are cut at the end of a phase once it's verified and CI-green; `v1.0.0` is reserved for App Store launch.
 
 **Scope note (2026-06-11):** **Document attachments are deferred to post-MVP (v1.x).** The MVP ships the core loop — remember an account → open its website → keep a note — with brand logos and polish. The `attachments` table and `documents` Storage bucket already exist in `supabase/schema.sql`, marked *reserved*, so v2 Documents is pure app-code work with no migration.

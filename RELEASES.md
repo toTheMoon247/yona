@@ -7,6 +7,21 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.2.0 — Android: Tiles · 2026-06-15
+
+The core loop on Android — full tile CRUD (Phase A2), all against the shared
+Supabase backend (so accounts created on either phone appear on both).
+
+- **Home grid** of the user's tiles (2 columns, colored letter placeholders, a note
+  dot when notes is set) with loading / empty / loaded / error states.
+- **Create, view, edit, delete** tiles: a `+` form (with `https://` auto-prepend), a
+  detail screen with **Open Website**, a reusable add/edit form, and delete with a
+  confirm dialog.
+- **Search** by title or URL (case- and diacritic-insensitive) with a no-results state.
+
+Logos are still letter-tile placeholders — real brand logos arrive in Phase A3. The
+Android plan is now tracked in `docs/android-plan.md`.
+
 ## android-v0.1.0 — Android: Authentication · 2026-06-15
 
 First milestone of the **Android** app (Kotlin + Jetpack Compose), sharing the
