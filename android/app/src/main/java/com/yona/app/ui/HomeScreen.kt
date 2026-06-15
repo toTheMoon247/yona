@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,8 +14,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.DropdownMenu
@@ -23,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +47,7 @@ import com.yona.app.core.AuthStore
 import com.yona.app.core.LoadState
 import com.yona.app.core.Tile
 import com.yona.app.core.TileStore
+import java.text.Normalizer
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +59,7 @@ fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state = TileStore.tiles
+    var query by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(Unit) { TileStore.load() }
 
@@ -83,12 +90,90 @@ fun HomeScreen(
                     onRetry = { scope.launch { TileStore.load() } },
                 )
                 is LoadState.Loaded ->
-                    if (state.value.isEmpty()) EmptyState()
-                    else TileGrid(state.value, onTileClick)
+                    if (state.value.isEmpty()) {
+                        EmptyState()
+                    } else {
+                        LoadedContent(
+                            tiles = state.value,
+                            query = query,
+                            onQueryChange = { query = it },
+                            onTileClick = onTileClick,
+                        )
+                    }
             }
         }
     }
 }
+
+@Composable
+private fun LoadedContent(
+    tiles: List<Tile>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onTileClick: (Tile) -> Unit,
+) {
+    val filtered = remember(tiles, query) { tiles.filter { it.matches(query) } }
+
+    Column(Modifier.fillMaxSize()) {
+        SearchField(query = query, onQueryChange = onQueryChange)
+        if (filtered.isEmpty()) {
+            NoResults(query)
+        } else {
+            TileGrid(filtered, onTileClick)
+        }
+    }
+}
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        placeholder = { Text("Search") },
+        singleLine = true,
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(Icons.Default.Clear, contentDescription = "Clear search")
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun NoResults(query: String) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text("No results", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Nothing matches “$query”.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** Case- and diacritic-insensitive match on title or URL (mirrors iOS search). */
+private fun Tile.matches(query: String): Boolean {
+    val needle = fold(query.trim())
+    if (needle.isEmpty()) return true
+    return fold(title).contains(needle) || fold(url).contains(needle)
+}
+
+private fun fold(text: String): String =
+    Normalizer.normalize(text, Normalizer.Form.NFD)
+        .replace(Regex("\\p{Mn}+"), "")
+        .lowercase()
 
 @Composable
 private fun TileGrid(tiles: List<Tile>, onTileClick: (Tile) -> Unit) {
