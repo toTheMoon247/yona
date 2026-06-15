@@ -1,6 +1,7 @@
 package com.yona.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,12 +30,13 @@ import kotlin.math.abs
  * title beneath. Real brand logos replace the circle in Phase A3.
  */
 @Composable
-fun TileCard(tile: Tile, modifier: Modifier = Modifier) {
+fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val color = letterTileColor(tile.id)
 
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,

@@ -46,7 +46,11 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onAddClick: () -> Unit, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    onAddClick: () -> Unit,
+    onTileClick: (Tile) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val scope = rememberCoroutineScope()
     val state = TileStore.tiles
 
@@ -80,14 +84,14 @@ fun HomeScreen(onAddClick: () -> Unit, modifier: Modifier = Modifier) {
                 )
                 is LoadState.Loaded ->
                     if (state.value.isEmpty()) EmptyState()
-                    else TileGrid(state.value)
+                    else TileGrid(state.value, onTileClick)
             }
         }
     }
 }
 
 @Composable
-private fun TileGrid(tiles: List<Tile>) {
+private fun TileGrid(tiles: List<Tile>, onTileClick: (Tile) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -96,7 +100,7 @@ private fun TileGrid(tiles: List<Tile>) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tiles, key = { it.id }) { tile ->
-            TileCard(tile)
+            TileCard(tile, onClick = { onTileClick(tile) })
         }
     }
 }
