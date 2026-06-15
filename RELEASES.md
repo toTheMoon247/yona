@@ -4,6 +4,22 @@ Milestone checkpoints for Yona. Each is an annotated, semver pre-1.0 git tag
 (`v0.MINOR.0`) cut only at a **verified, CI-green** state — these are the
 project's rollback points. `v1.0.0` is reserved for App Store launch. Newest first.
 
+Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
+iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
+
+## android-v0.1.0 — Android: Authentication · 2026-06-15
+
+First milestone of the **Android** app (Kotlin + Jetpack Compose), sharing the
+same Supabase backend as iOS.
+
+- **Google sign-in end to end** (Supabase external-browser OAuth → `yona://auth-callback`
+  deep link), verified on the emulator: app → Google approval → back into the app, signed in.
+- **Session persists** across app restarts (SharedPreferences); **sign-out** returns
+  to the sign-in screen.
+- **Sign in with Apple** is present but disabled — a stub, same as iOS.
+- Built on the Phase A0 foundation: supabase-kt 3.6.0, config via git-ignored
+  `secrets.properties` → `BuildConfig`, and the `LoadState`/`AuthGate` skeleton.
+
 ## v0.5.0 — Documents · 2026-06-12
 
 Attach documents to a tile — and the cap on a big run of post-MVP features.
