@@ -86,3 +86,9 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 **Where we are.** The iPhone app is finished and saved (v0.5.0). The Android app now has login plus the full accounts screen working on a test phone. It still shows simple colored-letter placeholders instead of real brand logos.
 
 **Next steps (next day).** Add real brand logos to the Android app (Netflix, Spotify, and so on), with a clean fallback when a logo isn't found — after which the Android app will look like the finished iPhone app.
+
+---
+
+## Rest day — 2026-06-16
+
+Day off — no coding today. Picking back up next session with brand logos on Android (Phase A3). _(Not counted as a work day, so the next coding session is Day 6.)_
