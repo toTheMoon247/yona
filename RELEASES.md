@@ -7,6 +7,22 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.3.0 — Android: Logos · 2026-06-17
+
+Real brand logos replace the letter placeholders on Android (Phase A3), and the
+grid is restyled to match the iOS app.
+
+- **Brandfetch logos** on the grid + detail via Coil (cached in memory + on disk),
+  with a fallback chain: Brandfetch → site favicon → colored letter tile (never a
+  broken image). Domain extraction is unit-tested.
+- **Tiles match iOS:** soft pastel rounded cards, the whole logo fit inside a circle
+  with breathing room, title beneath — plus a subtle drop shadow and a modern pill
+  search box (Android touches beyond iOS).
+- **Detail screen** leads with the logo (bordered circle), the site host, and Open
+  Website, with notes in a card.
+
+Android now visually matches the iOS app. Next: polish (A4), then the parity features.
+
 ## android-v0.2.0 — Android: Tiles · 2026-06-15
 
 The core loop on Android — full tile CRUD (Phase A2), all against the shared
