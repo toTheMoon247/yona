@@ -5,9 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,25 +17,31 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.yona.app.core.Logos
 import com.yona.app.core.Tile
 import kotlin.math.abs
 
 /**
- * A single Home grid cell: a placeholder letter "logo" filling the cell, with the
- * title beneath. Real brand logos replace the circle in Phase A3.
+ * A single Home grid cell: the brand logo (Brandfetch, via Coil) filling the cell,
+ * falling back to a colored letter "logo" while loading or when no logo is found,
+ * with the title beneath. Coil caches bytes (memory + disk) so logos don't re-fetch.
  */
 @Composable
 fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val color = letterTileColor(tile.id)
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -43,21 +50,12 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
     ) {
-        Box(
+        TileLogo(
+            tile = tile,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(CircleShape)
-                .background(Brush.verticalGradient(listOf(color, color.darken(0.18f)))),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = tile.initial,
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
-        }
+                .aspectRatio(1f),
+        )
 
         Spacer(Modifier.height(8.dp))
 
@@ -80,6 +78,45 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+@Composable
+fun TileLogo(tile: Tile, modifier: Modifier = Modifier) {
+    val logoUrl = remember(tile.url) { Logos.brandfetchUrl(tile.url) }
+
+    Box(modifier.clip(CircleShape)) {
+        if (logoUrl == null) {
+            LetterTile(tile, Modifier.fillMaxSize())
+        } else {
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(logoUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = tile.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                loading = { LetterTile(tile, Modifier.fillMaxSize()) },
+                error = { LetterTile(tile, Modifier.fillMaxSize()) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LetterTile(tile: Tile, modifier: Modifier = Modifier) {
+    val color = letterTileColor(tile.id)
+    Box(
+        modifier = modifier.background(Brush.verticalGradient(listOf(color, color.darken(0.18f)))),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = tile.initial,
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
     }
 }
 
