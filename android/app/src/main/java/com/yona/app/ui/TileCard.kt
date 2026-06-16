@@ -90,25 +90,36 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 fun TileLogo(tile: Tile, modifier: Modifier = Modifier) {
-    val logoUrl = remember(tile.url) { Logos.brandfetchUrl(tile.url) }
+    val brandfetchUrl = remember(tile.url) { Logos.brandfetchUrl(tile.url) }
+    val faviconUrl = remember(tile.url) { Logos.faviconUrl(tile.url) }
 
+    // Fallback chain: Brandfetch logo → site favicon → colored letter tile.
     Box(modifier.clip(CircleShape)) {
-        if (logoUrl == null) {
-            LetterTile(tile, Modifier.fillMaxSize())
-        } else {
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(logoUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = tile.title,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-                loading = { LetterTile(tile, Modifier.fillMaxSize()) },
-                error = { LetterTile(tile, Modifier.fillMaxSize()) },
-            )
+        LogoImage(brandfetchUrl, tile) {
+            LogoImage(faviconUrl, tile) {
+                LetterTile(tile, Modifier.fillMaxSize())
+            }
         }
     }
+}
+
+@Composable
+private fun LogoImage(url: String?, tile: Tile, fallback: @Composable () -> Unit) {
+    if (url == null) {
+        fallback()
+        return
+    }
+    SubcomposeAsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(url)
+            .crossfade(true)
+            .build(),
+        contentDescription = tile.title,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Fit,
+        loading = { LetterTile(tile, Modifier.fillMaxSize()) },
+        error = { fallback() },
+    )
 }
 
 @Composable

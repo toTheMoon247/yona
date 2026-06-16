@@ -34,4 +34,10 @@ object Logos {
         if (clientId.isBlank()) return null
         return "https://cdn.brandfetch.io/$domain/icon/fallback/404/w/$size/h/$size?c=$clientId"
     }
+
+    /** The site's favicon via Google's service — fallback for brands Brandfetch misses. */
+    fun faviconUrl(website: String, size: Int = 128): String? {
+        val domain = domain(website) ?: return null
+        return "https://www.google.com/s2/favicons?domain=$domain&sz=$size"
+    }
 }
