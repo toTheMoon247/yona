@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -36,24 +38,27 @@ import com.yona.app.core.Tile
 import kotlin.math.abs
 
 /**
- * A single Home grid cell: the brand logo (Brandfetch, via Coil) filling the cell,
- * falling back to a colored letter "logo" while loading or when no logo is found,
- * with the title beneath. Coil caches bytes (memory + disk) so logos don't re-fetch.
+ * A single Home grid cell, mirroring iOS: a soft pastel rounded-rectangle card with
+ * the brand logo (Brandfetch via Coil) centered inside a circle with breathing room,
+ * and the title beneath — falling back to a colored letter "logo" when none is found.
  */
 @Composable
 fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() }
-            .padding(4.dp),
+            .background(tileBackgroundColor(tile.id))
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
     ) {
         TileLogo(
             tile = tile,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
                 .aspectRatio(1f),
         )
 
@@ -68,12 +73,14 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(TileTitleColor),
                 )
             }
             Text(
                 text = tile.title,
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = TileTitleColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -96,7 +103,7 @@ fun TileLogo(tile: Tile, modifier: Modifier = Modifier) {
                     .build(),
                 contentDescription = tile.title,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 loading = { LetterTile(tile, Modifier.fillMaxSize()) },
                 error = { LetterTile(tile, Modifier.fillMaxSize()) },
             )
@@ -120,8 +127,19 @@ private fun LetterTile(tile: Tile, modifier: Modifier = Modifier) {
     }
 }
 
-// Letter-tile palette + stable color, mirroring the iOS DesignTokens (djb2 hash so
-// a tile keeps the same color across launches).
+// Near-black title color, readable on every pastel card in light or dark theme.
+private val TileTitleColor = Color(0xFF1C1B1F)
+
+// Soft pastel card backgrounds, mirroring the iOS DesignTokens.tileBackgrounds.
+private val tileBackgrounds = listOf(
+    Color(0xFFFAEBEB), // pink
+    Color(0xFFE6F0FC), // blue
+    Color(0xFFE8F5EB), // green
+    Color(0xFFF2EBFA), // purple
+    Color(0xFFFCF5E3), // amber
+)
+
+// Saturated letter-tile (placeholder logo) palette.
 private val tileColors = listOf(
     Color(0xFF2563EB), // blue
     Color(0xFF16A34A), // green
@@ -133,13 +151,17 @@ private val tileColors = listOf(
     Color(0xFFDC2626), // red
 )
 
-private fun letterTileColor(key: String): Color {
+private fun tileBackgroundColor(key: String): Color = tileBackgrounds[stableIndex(key, tileBackgrounds.size)]
+
+private fun letterTileColor(key: String): Color = tileColors[stableIndex(key, tileColors.size)]
+
+/** Deterministic djb2 index so a tile keeps the same colors across launches (mirrors iOS). */
+private fun stableIndex(key: String, count: Int): Int {
     var hash = 5381
     for (byte in key.toByteArray()) {
         hash = (hash * 33) + (byte.toInt() and 0xFF)
     }
-    val index = ((hash % tileColors.size) + tileColors.size) % tileColors.size
-    return tileColors[abs(index)]
+    return abs(((hash % count) + count) % count)
 }
 
 private fun Color.darken(fraction: Float): Color = Color(
