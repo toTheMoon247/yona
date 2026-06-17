@@ -7,6 +7,21 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.4.0 — Android: Polish (MVP feature-complete) · 2026-06-18
+
+Phase A4 — polish. Android now matches the iOS MVP feature set.
+
+- **States & motion:** loading skeleton, pull-to-refresh, animated tile add/remove,
+  light haptics on save/delete.
+- **Instant home:** a per-user on-disk cache renders the grid immediately on cold
+  launch, then refreshes from the network.
+- **Identity & accessibility:** app icon (the blue 2×2 grid, matching the in-app
+  logo) and an accessibility pass — each grid tile is a single labelled, focusable
+  element for TalkBack, with decorative logos and labelled icon buttons.
+
+Android is now **MVP feature-complete** (auth, tile CRUD, logos, polish), matching
+iOS `v0.4.0`. Next: the parity features (cost, renewals, smart add, documents).
+
 ## android-v0.3.0 — Android: Logos · 2026-06-17
 
 Real brand logos replace the letter placeholders on Android (Phase A3), and the
