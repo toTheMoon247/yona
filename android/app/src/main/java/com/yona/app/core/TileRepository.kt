@@ -3,6 +3,7 @@ package com.yona.app.core
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,7 +13,8 @@ import kotlinx.serialization.Serializable
  */
 object TileRepository {
 
-    private val columns = Columns.list("id", "title", "url", "logo_url", "notes", "created_at")
+    private val columns =
+        Columns.list("id", "title", "url", "logo_url", "notes", "cost_amount", "cost_period", "created_at")
 
     /** All of the current user's tiles, newest first. */
     suspend fun fetchTiles(): List<Tile> =
@@ -56,6 +58,14 @@ private data class TilePayload(
     val title: String,
     val url: String,
     val notes: String?,
+    @SerialName("cost_amount") val costAmount: Double?,
+    @SerialName("cost_period") val costPeriod: String?,
 ) {
-    constructor(draft: TileDraft) : this(draft.title, draft.url, draft.notes)
+    constructor(draft: TileDraft) : this(
+        title = draft.title,
+        url = draft.url,
+        notes = draft.notes,
+        costAmount = draft.costAmount,
+        costPeriod = draft.costPeriod,
+    )
 }

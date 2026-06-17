@@ -20,6 +20,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -35,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.yona.app.core.CostPeriod
 import com.yona.app.core.Tile
 import com.yona.app.core.TileDraft
 import com.yona.app.core.TileStore
@@ -45,6 +49,10 @@ import kotlinx.coroutines.launch
  * Create (existing == null) or edit (existing != null) a tile. Reuses one form
  * for both, mirroring the iOS shared form.
  */
+/** Prefill the cost field without a trailing ".0" for whole amounts. */
+private fun formatAmount(amount: Double): String =
+    if (amount % 1.0 == 0.0) amount.toLong().toString() else amount.toString()
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) {
@@ -55,6 +63,8 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     var title by rememberSaveable { mutableStateOf(existing?.title ?: "") }
     var url by rememberSaveable { mutableStateOf(existing?.url ?: "") }
     var notes by rememberSaveable { mutableStateOf(existing?.notes ?: "") }
+    var costText by rememberSaveable { mutableStateOf(existing?.costAmount?.let { formatAmount(it) } ?: "") }
+    var period by rememberSaveable { mutableStateOf(existing?.costPeriod ?: CostPeriod.MONTHLY) }
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -66,10 +76,13 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
         scope.launch {
             saving = true
             error = null
+            val amount = costText.trim().toDoubleOrNull()?.takeIf { it > 0 }
             val draft = TileDraft(
                 title = title.trim(),
                 url = UrlHelpers.normalized(url),
                 notes = notes.trim().ifBlank { null },
+                costAmount = amount,
+                costPeriod = if (amount != null) period else null,
             )
             val result = if (existing != null) {
                 TileStore.update(existing.id, draft)
@@ -144,6 +157,33 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                 enabled = !saving,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            OutlinedTextField(
+                value = costText,
+                onValueChange = { costText = it },
+                label = { Text("Cost (optional)") },
+                singleLine = true,
+                enabled = !saving,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            if (costText.isNotBlank()) {
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        selected = period == CostPeriod.MONTHLY,
+                        onClick = { period = CostPeriod.MONTHLY },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                        enabled = !saving,
+                    ) { Text("Monthly") }
+                    SegmentedButton(
+                        selected = period == CostPeriod.YEARLY,
+                        onClick = { period = CostPeriod.YEARLY },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                        enabled = !saving,
+                    ) { Text("Yearly") }
+                }
+            }
 
             error?.let {
                 Text(

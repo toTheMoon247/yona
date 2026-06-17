@@ -59,6 +59,7 @@ import com.yona.app.core.AuthStore
 import com.yona.app.core.LoadState
 import com.yona.app.core.Tile
 import com.yona.app.core.TileStore
+import com.yona.app.core.formatCurrency
 import java.text.Normalizer
 import kotlinx.coroutines.launch
 
@@ -137,6 +138,7 @@ private fun LoadedContent(
     onRefresh: () -> Unit,
 ) {
     val filtered = remember(tiles, query) { tiles.filter { it.matches(query) } }
+    val monthlyTotal = remember(tiles) { tiles.sumOf { it.monthlyCost ?: 0.0 } }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -144,6 +146,16 @@ private fun LoadedContent(
         modifier = Modifier.fillMaxSize(),
     ) {
         Column(Modifier.fillMaxSize()) {
+            if (monthlyTotal > 0.0) {
+                Text(
+                    text = "Estimated ${formatCurrency(monthlyTotal)} / month",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                )
+            }
             SearchField(query = query, onQueryChange = onQueryChange)
             if (filtered.isEmpty()) {
                 NoResults(query)

@@ -131,6 +131,14 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            tile.formattedCost?.let { cost ->
+                Text(
+                    text = cost,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
             Spacer(Modifier.height(4.dp))
 
             Button(
