@@ -31,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.yona.app.core.Tile
@@ -47,6 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
     val editing = existing != null
 
     var title by rememberSaveable { mutableStateOf(existing?.title ?: "") }
@@ -74,7 +77,10 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                 TileStore.create(draft)
             }
             result.fold(
-                onSuccess = { onSaved() },
+                onSuccess = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onSaved()
+                },
                 onFailure = {
                     error = it.message ?: "Couldn't save. Please try again."
                     saving = false

@@ -1,10 +1,17 @@
 package com.yona.app.ui
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,11 +27,10 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,6 +72,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val state = TileStore.tiles
     var query by rememberSaveable { mutableStateOf("") }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { TileStore.load() }
 
@@ -87,7 +97,7 @@ fun HomeScreen(
     ) { innerPadding ->
         Box(Modifier.fillMaxSize().padding(innerPadding)) {
             when (state) {
-                LoadState.Idle, LoadState.Loading -> CenteredProgress()
+                LoadState.Idle, LoadState.Loading -> SkeletonGrid()
                 is LoadState.Failed -> ErrorState(
                     message = state.message,
                     onRetry = { scope.launch { TileStore.load() } },
@@ -101,6 +111,14 @@ fun HomeScreen(
                             query = query,
                             onQueryChange = { query = it },
                             onTileClick = onTileClick,
+                            isRefreshing = isRefreshing,
+                            onRefresh = {
+                                scope.launch {
+                                    isRefreshing = true
+                                    TileStore.load(showLoading = false)
+                                    isRefreshing = false
+                                }
+                            },
                         )
                     }
             }
@@ -108,21 +126,30 @@ fun HomeScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LoadedContent(
     tiles: List<Tile>,
     query: String,
     onQueryChange: (String) -> Unit,
     onTileClick: (Tile) -> Unit,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
 ) {
     val filtered = remember(tiles, query) { tiles.filter { it.matches(query) } }
 
-    Column(Modifier.fillMaxSize()) {
-        SearchField(query = query, onQueryChange = onQueryChange)
-        if (filtered.isEmpty()) {
-            NoResults(query)
-        } else {
-            TileGrid(filtered, onTileClick)
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            SearchField(query = query, onQueryChange = onQueryChange)
+            if (filtered.isEmpty()) {
+                NoResults(query)
+            } else {
+                TileGrid(filtered, onTileClick)
+            }
         }
     }
 }
@@ -197,15 +224,64 @@ private fun TileGrid(tiles: List<Tile>, onTileClick: (Tile) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(tiles, key = { it.id }) { tile ->
-            TileCard(tile, onClick = { onTileClick(tile) })
+            TileCard(
+                tile = tile,
+                onClick = { onTileClick(tile) },
+                modifier = Modifier.animateItem(),
+            )
         }
     }
 }
 
 @Composable
-private fun CenteredProgress() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
+private fun SkeletonGrid() {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        items(6) { TileCardSkeleton() }
+    }
+}
+
+@Composable
+private fun TileCardSkeleton() {
+    val transition = rememberInfiniteTransition(label = "skeleton")
+    val alpha by transition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
+        label = "alpha",
+    )
+    val placeholder = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha * 0.2f)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .aspectRatio(1f)
+                .clip(CircleShape)
+                .background(placeholder),
+        )
+        Spacer(Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .height(14.dp)
+                .clip(RoundedCornerShape(7.dp))
+                .background(placeholder),
+        )
+        Spacer(Modifier.height(4.dp))
     }
 }
 
