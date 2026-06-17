@@ -7,6 +7,16 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.4.1 — Android: Cost tracking · 2026-06-18
+
+Optional per-tile cost — Android starting to catch up to the iOS post-MVP features.
+
+- **Cost field** + a Monthly/Yearly selector in the add/edit form (optional; empty = no cost).
+- **Detail** shows the cost; **Home** shows an "Estimated $X / month" total (yearly
+  costs normalized to monthly). Costs set on iOS show here too (shared backend).
+- Tolerant numeric decode (PostgREST may send `numeric` as a number or a string),
+  mirroring the iOS flexible cost decode.
+
 ## android-v0.4.0 — Android: Polish (MVP feature-complete) · 2026-06-18
 
 Phase A4 — polish. Android now matches the iOS MVP feature set.
