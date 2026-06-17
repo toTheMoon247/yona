@@ -48,7 +48,9 @@ object AuthStore {
     suspend fun signOut() {
         errorMessage = null
         try {
+            TileCache.clear() // while still signed in (cache file is keyed by user id)
             auth.signOut()
+            TileStore.reset()
         } catch (e: Exception) {
             errorMessage = "Sign-out failed. Please try again."
         }

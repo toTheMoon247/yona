@@ -14,16 +14,32 @@ object TileStore {
 
     /** Load the list. [showLoading] = false keeps the current grid visible (pull-to-refresh). */
     suspend fun load(showLoading: Boolean = true) {
-        if (showLoading) tiles = LoadState.Loading
+        if (tiles !is LoadState.Loaded) {
+            // Render the cached list instantly on cold launch, then refresh below.
+            val cached = TileCache.read()
+            tiles = when {
+                cached != null -> LoadState.Loaded(cached)
+                showLoading -> LoadState.Loading
+                else -> tiles
+            }
+        }
         runCatching { TileRepository.fetchTiles() }.fold(
-            onSuccess = { tiles = LoadState.Loaded(it) },
+            onSuccess = {
+                tiles = LoadState.Loaded(it)
+                TileCache.write(it)
+            },
             onFailure = { error ->
-                // Don't blow away an existing list on a silent refresh failure.
+                // Don't blow away an existing (or cached) list on a silent refresh failure.
                 if (tiles !is LoadState.Loaded) {
                     tiles = LoadState.Failed(error.message ?: "Couldn't load your accounts.")
                 }
             },
         )
+    }
+
+    /** Reset in-memory state (e.g. on sign-out) so the next user doesn't see stale tiles. */
+    fun reset() {
+        tiles = LoadState.Idle
     }
 
     /** Create a tile, then refresh the list so it appears on Home. */
