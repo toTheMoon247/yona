@@ -27,6 +27,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,7 +54,8 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
             .clip(RoundedCornerShape(20.dp))
             .clickable { onClick() }
             .background(tileBackgroundColor(tile.id))
-            .padding(12.dp),
+            .padding(12.dp)
+            .semantics(mergeDescendants = true) {},
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         TileLogo(
@@ -73,7 +77,8 @@ fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(TileTitleColor),
+                        .background(TileTitleColor)
+                        .semantics { contentDescription = "has a note" },
                 )
             }
             Text(
@@ -114,7 +119,7 @@ private fun LogoImage(url: String?, tile: Tile, fallback: @Composable () -> Unit
             .data(url)
             .crossfade(true)
             .build(),
-        contentDescription = tile.title,
+        contentDescription = null, // decorative; the title text labels the tile
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Fit,
         loading = { LetterTile(tile, Modifier.fillMaxSize()) },
@@ -134,6 +139,7 @@ private fun LetterTile(tile: Tile, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             color = Color.White,
+            modifier = Modifier.clearAndSetSemantics {},
         )
     }
 }
