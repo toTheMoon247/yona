@@ -1,8 +1,8 @@
 package com.yona.app.core
 
 /**
- * The editable fields for creating/updating a tile. Renewal fields are added in a
- * later phase (mirrors the iOS TileDraft).
+ * The editable fields for creating/updating a tile (mirrors the iOS TileDraft).
+ * Dates are ISO "yyyy-MM-dd" strings, matching the Postgres `date` column.
  */
 data class TileDraft(
     val title: String,
@@ -10,4 +10,6 @@ data class TileDraft(
     val notes: String?,
     val costAmount: Double? = null,
     val costPeriod: String? = null,
+    val renewalDate: String? = null,
+    val renewalRepeat: String? = null,
 )

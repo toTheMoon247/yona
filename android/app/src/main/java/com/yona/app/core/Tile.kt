@@ -3,10 +3,13 @@ package com.yona.app.core
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.text.NumberFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 /**
- * A saved online account/service (a row in the `tiles` table). Renewal fields are
- * added in a later phase.
+ * A saved online account/service (a row in the `tiles` table).
  */
 @Serializable
 data class Tile(
@@ -19,6 +22,8 @@ data class Tile(
     @Serializable(with = FlexibleDoubleSerializer::class)
     val costAmount: Double? = null,
     @SerialName("cost_period") val costPeriod: String? = null,
+    @SerialName("renewal_date") val renewalDate: String? = null,
+    @SerialName("renewal_repeat") val renewalRepeat: String? = null,
     @SerialName("created_at") val createdAt: String,
 ) {
     /** First letter of the title for the placeholder logo. */
@@ -39,6 +44,47 @@ data class Tile(
         val unit = if (period == CostPeriod.YEARLY) "year" else "month"
         return "${formatCurrency(amount)} / $unit"
     }
+
+    private val anchorDate: LocalDate? get() =
+        renewalDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
+    /** The next upcoming renewal: a repeating anchor rolled forward to today or later. */
+    val nextRenewal: LocalDate? get() {
+        var date = anchorDate ?: return null
+        val today = LocalDate.now()
+        when (renewalRepeat) {
+            RenewalRepeat.MONTHLY -> while (date.isBefore(today)) date = date.plusMonths(1)
+            RenewalRepeat.YEARLY -> while (date.isBefore(today)) date = date.plusYears(1)
+            else -> return date
+        }
+        return date
+    }
+
+    /** Whole days from today until the next renewal (negative if past); null if unset. */
+    val daysUntilRenewal: Long? get() {
+        val next = nextRenewal ?: return null
+        return ChronoUnit.DAYS.between(LocalDate.now(), next)
+    }
+
+    /** Relative phrase: "today", "tomorrow", "in 12 days", "3 days ago". */
+    val renewalRelative: String? get() {
+        val days = daysUntilRenewal ?: return null
+        return when {
+            days == 0L -> "today"
+            days == 1L -> "tomorrow"
+            days == -1L -> "yesterday"
+            days > 0 -> "in $days days"
+            else -> "${-days} days ago"
+        }
+    }
+
+    /** e.g. "Jul 15, 2026 · in 12 days"; null if unset. */
+    val renewalSummary: String? get() {
+        val next = nextRenewal ?: return null
+        val dateStr = next.format(renewalDisplayFormatter)
+        val relative = renewalRelative ?: return dateStr
+        return "$dateStr · $relative"
+    }
 }
 
 object CostPeriod {
@@ -46,5 +92,13 @@ object CostPeriod {
     const val YEARLY = "yearly"
 }
 
+object RenewalRepeat {
+    const val MONTHLY = "monthly"
+    const val YEARLY = "yearly"
+}
+
 /** Formats an amount in the device's locale currency, e.g. "$15.00". */
 fun formatCurrency(amount: Double): String = NumberFormat.getCurrencyInstance().format(amount)
+
+private val renewalDisplayFormatter: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())

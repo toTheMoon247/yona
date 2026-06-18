@@ -139,6 +139,14 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
                 )
             }
 
+            tile.renewalSummary?.let { renews ->
+                Text(
+                    text = "Renews $renews",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
             Spacer(Modifier.height(4.dp))
 
             Button(

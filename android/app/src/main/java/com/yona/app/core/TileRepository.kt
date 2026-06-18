@@ -13,8 +13,10 @@ import kotlinx.serialization.Serializable
  */
 object TileRepository {
 
-    private val columns =
-        Columns.list("id", "title", "url", "logo_url", "notes", "cost_amount", "cost_period", "created_at")
+    private val columns = Columns.list(
+        "id", "title", "url", "logo_url", "notes",
+        "cost_amount", "cost_period", "renewal_date", "renewal_repeat", "created_at",
+    )
 
     /** All of the current user's tiles, newest first. */
     suspend fun fetchTiles(): List<Tile> =
@@ -60,6 +62,8 @@ private data class TilePayload(
     val notes: String?,
     @SerialName("cost_amount") val costAmount: Double?,
     @SerialName("cost_period") val costPeriod: String?,
+    @SerialName("renewal_date") val renewalDate: String?,
+    @SerialName("renewal_repeat") val renewalRepeat: String?,
 ) {
     constructor(draft: TileDraft) : this(
         title = draft.title,
@@ -67,5 +71,7 @@ private data class TilePayload(
         notes = draft.notes,
         costAmount = draft.costAmount,
         costPeriod = draft.costPeriod,
+        renewalDate = draft.renewalDate,
+        renewalRepeat = draft.renewalRepeat,
     )
 }
