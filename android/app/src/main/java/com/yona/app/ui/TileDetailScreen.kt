@@ -159,6 +159,8 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
             if (tile.hasNotes) {
                 NotesCard(tile.notes.orEmpty())
             }
+
+            AttachmentsView(tileId = tile.id, modifier = Modifier.fillMaxWidth())
         }
     }
 
