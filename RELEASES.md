@@ -7,6 +7,18 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.4.2 — Android: Renewal dates & sort · 2026-06-18
+
+Phase A6 — an optional renewal/due date per tile (with cost tracking, Android is now
+a lightweight subscription tracker), plus Home sorting.
+
+- Optional **renewal date** with recurrence (monthly/yearly, rolled forward so it
+  never goes stale) — quick chips (today / +1 month / +1 year) and a date picker;
+  shown on detail as "Renews <date> · in N days".
+- Home **sort menu** (in the ⋮ menu): recently added / due date / name / cost,
+  persisted across launches.
+- Uses core library desugaring for `java.time` on minSdk 24.
+
 ## android-v0.4.1 — Android: Cost tracking · 2026-06-18
 
 Optional per-tile cost — Android starting to catch up to the iOS post-MVP features.
