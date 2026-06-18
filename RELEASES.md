@@ -7,6 +7,17 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.4.3 — Android: Smart add (service search) · 2026-06-18
+
+Phase A7 — search a brand by name to auto-fill an account.
+
+- Type a brand (e.g. "Netflix") in the add flow → a debounced Brandfetch Brand
+  Search shows results (logo + name + domain) → pick one to **auto-fill the title,
+  website, and logo** (all still editable). Manual entry remains for anything it
+  can't find.
+- Integrated into the single add screen — Android keeps one screen rather than the
+  iOS two-step wizard; the capability is the same.
+
 ## android-v0.4.2 — Android: Renewal dates & sort · 2026-06-18
 
 Phase A6 — an optional renewal/due date per tile (with cost tracking, Android is now
