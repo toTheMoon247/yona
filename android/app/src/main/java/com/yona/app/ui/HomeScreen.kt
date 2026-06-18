@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -31,6 +33,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +60,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yona.app.core.AuthStore
 import com.yona.app.core.LoadState
+import com.yona.app.core.Settings
 import com.yona.app.core.Tile
+import com.yona.app.core.TileSort
 import com.yona.app.core.TileStore
 import com.yona.app.core.formatCurrency
 import java.text.Normalizer
@@ -74,6 +79,7 @@ fun HomeScreen(
     val state = TileStore.tiles
     var query by rememberSaveable { mutableStateOf("") }
     var isRefreshing by remember { mutableStateOf(false) }
+    var sort by remember { mutableStateOf(Settings.tileSort) }
 
     LaunchedEffect(Unit) { TileStore.load() }
 
@@ -86,7 +92,14 @@ fun HomeScreen(
                     IconButton(onClick = { scope.launch { TileStore.load() } }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                     }
-                    OverflowMenu(onSignOut = { scope.launch { AuthStore.signOut() } })
+                    OverflowMenu(
+                        currentSort = sort,
+                        onSortSelected = {
+                            sort = it
+                            Settings.tileSort = it
+                        },
+                        onSignOut = { scope.launch { AuthStore.signOut() } },
+                    )
                 },
             )
         },
@@ -110,6 +123,7 @@ fun HomeScreen(
                         LoadedContent(
                             tiles = state.value,
                             query = query,
+                            sort = sort,
                             onQueryChange = { query = it },
                             onTileClick = onTileClick,
                             isRefreshing = isRefreshing,
@@ -132,12 +146,14 @@ fun HomeScreen(
 private fun LoadedContent(
     tiles: List<Tile>,
     query: String,
+    sort: TileSort,
     onQueryChange: (String) -> Unit,
     onTileClick: (Tile) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
 ) {
     val filtered = remember(tiles, query) { tiles.filter { it.matches(query) } }
+    val sorted = remember(filtered, sort) { sort.sorted(filtered) }
     val monthlyTotal = remember(tiles) { tiles.sumOf { it.monthlyCost ?: 0.0 } }
 
     PullToRefreshBox(
@@ -157,10 +173,10 @@ private fun LoadedContent(
                 )
             }
             SearchField(query = query, onQueryChange = onQueryChange)
-            if (filtered.isEmpty()) {
+            if (sorted.isEmpty()) {
                 NoResults(query)
             } else {
-                TileGrid(filtered, onTileClick)
+                TileGrid(sorted, onTileClick)
             }
         }
     }
@@ -334,12 +350,39 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun OverflowMenu(onSignOut: () -> Unit) {
+private fun OverflowMenu(
+    currentSort: TileSort,
+    onSortSelected: (TileSort) -> Unit,
+    onSignOut: () -> Unit,
+) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
         Icon(Icons.Default.MoreVert, contentDescription = "More")
     }
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        Text(
+            text = "Sort by",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        TileSort.entries.forEach { option ->
+            DropdownMenuItem(
+                text = { Text(option.label) },
+                onClick = {
+                    expanded = false
+                    onSortSelected(option)
+                },
+                leadingIcon = {
+                    if (option == currentSort) {
+                        Icon(Icons.Default.Check, contentDescription = null)
+                    } else {
+                        Spacer(Modifier.size(24.dp))
+                    }
+                },
+            )
+        }
+        HorizontalDivider()
         DropdownMenuItem(
             text = { Text("Sign out") },
             onClick = {
