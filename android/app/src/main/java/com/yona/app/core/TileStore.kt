@@ -54,8 +54,11 @@ object TileStore {
             .onSuccess { load(showLoading = false) }
             .map { }
 
-    /** Delete a tile, then refresh the list. */
+    /** Delete a tile (sweeping its Storage files first), then refresh the list. */
     suspend fun delete(id: String): Result<Unit> =
-        runCatching { TileRepository.deleteTile(id) }
-            .onSuccess { load(showLoading = false) }
+        runCatching {
+            // Best-effort: the row cascade removes attachment rows, not the files.
+            runCatching { AttachmentRepository.deleteTileAttachments(id) }
+            TileRepository.deleteTile(id)
+        }.onSuccess { load(showLoading = false) }
 }

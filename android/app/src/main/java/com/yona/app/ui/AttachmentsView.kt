@@ -7,9 +7,11 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +22,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,6 +72,7 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
     var state by remember { mutableStateOf<LoadState<List<Attachment>>>(LoadState.Idle) }
     var uploading by remember { mutableStateOf(false) }
     var openingId by remember { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<Attachment?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
     suspend fun load() {
@@ -131,6 +139,22 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
         }
     }
 
+    fun remove(attachment: Attachment) {
+        scope.launch {
+            error = null
+            try {
+                AttachmentRepository.deleteAttachment(attachment)
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                (state as? LoadState.Loaded)?.value?.let { current ->
+                    state = LoadState.Loaded(current.filterNot { it.id == attachment.id })
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Yona", "Attachment delete failed", e)
+                error = if (BuildConfig.DEBUG) "Couldn't delete: ${e.message}" else "Couldn't delete this document."
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -164,6 +188,7 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
                             attachment = attachment,
                             opening = openingId == attachment.id,
                             onClick = { open(attachment) },
+                            onDelete = { pendingDelete = attachment },
                         )
                     }
                 }
@@ -200,34 +225,84 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
             )
         }
     }
+
+    pendingDelete?.let { target ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Delete document?") },
+            text = { Text("\"${target.filename}\" will be removed. This can't be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    remove(target)
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+            },
+        )
+    }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun AttachmentRow(attachment: Attachment, opening: Boolean, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = !opening) { onClick() }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = attachment.filename,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            attachment.displaySize?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+private fun AttachmentRow(
+    attachment: Attachment,
+    opening: Boolean,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    enabled = !opening,
+                    onClick = onClick,
+                    onLongClick = { menuOpen = true },
                 )
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = attachment.filename,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                attachment.displaySize?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            if (opening) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+            } else {
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete document",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
-        if (opening) {
-            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text("Delete") },
+                onClick = {
+                    menuOpen = false
+                    onDelete()
+                },
+            )
         }
     }
 }
