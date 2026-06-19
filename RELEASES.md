@@ -7,6 +7,21 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.5.0 — Android: Documents (full iOS parity) · 2026-06-19
+
+Phase A8 — attach documents to a tile. **Android now matches the iOS feature set.**
+
+- **Attach / open / delete** files on the detail screen, using the same private
+  Supabase Storage bucket + RLS as iOS (baseline storage; no client-side E2E).
+- Attach via the file picker (25 MB cap); open via download → external viewer
+  (FileProvider `content://`); delete via a trash icon or long-press, with a
+  confirmation dialog.
+- Deleting a tile sweeps its Storage folder (the row cascade only removes rows).
+
+**Android is now at full feature parity with iOS** — auth, tile CRUD, logos, polish,
+cost, renewal dates + sort, smart add, and documents. `v1.0.0` is reserved for the
+store launches.
+
 ## android-v0.4.3 — Android: Smart add (service search) · 2026-06-18
 
 Phase A7 — search a brand by name to auto-fill an account.
