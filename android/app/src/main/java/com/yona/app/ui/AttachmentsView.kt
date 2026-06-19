@@ -1,11 +1,14 @@
 package com.yona.app.ui
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,9 +44,11 @@ import com.yona.app.BuildConfig
 import com.yona.app.core.Attachment
 import com.yona.app.core.AttachmentRepository
 import com.yona.app.core.LoadState
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 private const val MAX_BYTES = 25 * 1024 * 1024
 
@@ -59,6 +64,7 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
 
     var state by remember { mutableStateOf<LoadState<List<Attachment>>>(LoadState.Idle) }
     var uploading by remember { mutableStateOf(false) }
+    var openingId by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
     suspend fun load() {
@@ -96,6 +102,35 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
         }
     }
 
+    fun open(attachment: Attachment) {
+        if (openingId != null) return
+        scope.launch {
+            openingId = attachment.id
+            error = null
+            try {
+                val uri = withContext(Dispatchers.IO) {
+                    val bytes = AttachmentRepository.downloadAttachment(attachment.storagePath)
+                    val dir = File(context.cacheDir, "attachments").apply { mkdirs() }
+                    val file = File(dir, attachment.filename.substringAfterLast('/'))
+                    file.writeBytes(bytes)
+                    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+                }
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, attachment.contentType ?: "*/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                error = "No app can open this file type."
+            } catch (e: Exception) {
+                android.util.Log.e("Yona", "Attachment open failed", e)
+                error = if (BuildConfig.DEBUG) "Couldn't open: ${e.message}" else "Couldn't open this document."
+            } finally {
+                openingId = null
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -124,7 +159,13 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
-                    current.value.forEach { AttachmentRow(it) }
+                    current.value.forEach { attachment ->
+                        AttachmentRow(
+                            attachment = attachment,
+                            opening = openingId == attachment.id,
+                            onClick = { open(attachment) },
+                        )
+                    }
                 }
         }
 
@@ -162,9 +203,12 @@ fun AttachmentsView(tileId: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun AttachmentRow(attachment: Attachment) {
+private fun AttachmentRow(attachment: Attachment, opening: Boolean, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = !opening) { onClick() }
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -181,6 +225,9 @@ private fun AttachmentRow(attachment: Attachment) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+        if (opening) {
+            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
         }
     }
 }
