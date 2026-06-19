@@ -1,7 +1,8 @@
 package com.yona.app.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +16,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,49 +51,77 @@ import kotlin.math.abs
  * the brand logo (Brandfetch via Coil) centered inside a circle with breathing room,
  * and the title beneath — falling back to a colored letter "logo" when none is found.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TileCard(tile: Tile, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(20.dp))
-            .clip(RoundedCornerShape(20.dp))
-            .clickable { onClick() }
-            .background(tileBackgroundColor(tile.id))
-            .padding(12.dp)
-            .semantics(mergeDescendants = true) {},
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        TileLogo(
-            tile = tile,
+fun TileCard(
+    tile: Tile,
+    onClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Box(modifier) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .aspectRatio(1f),
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .combinedClickable(onClick = onClick, onLongClick = { menuOpen = true })
+                .background(tileBackgroundColor(tile.id))
+                .padding(12.dp)
+                .semantics(mergeDescendants = true) {},
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (tile.hasNotes) {
-                Box(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(TileTitleColor)
-                        .semantics { contentDescription = "has a note" },
+            TileLogo(
+                tile = tile,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .aspectRatio(1f),
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (tile.hasNotes) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(CircleShape)
+                            .background(TileTitleColor)
+                            .semantics { contentDescription = "has a note" },
+                    )
+                }
+                Text(
+                    text = tile.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = TileTitleColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(
-                text = tile.title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = TileTitleColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+        }
+
+        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+            DropdownMenuItem(
+                text = { Text("Edit") },
+                onClick = {
+                    menuOpen = false
+                    onEdit()
+                },
+            )
+            DropdownMenuItem(
+                text = { Text("Delete") },
+                onClick = {
+                    menuOpen = false
+                    onDelete()
+                },
             )
         }
     }

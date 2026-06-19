@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -56,6 +57,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.yona.app.core.AuthStore
@@ -73,13 +76,16 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onAddClick: () -> Unit,
     onTileClick: (Tile) -> Unit,
+    onEditTile: (Tile) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
     val state = TileStore.tiles
     var query by rememberSaveable { mutableStateOf("") }
     var isRefreshing by remember { mutableStateOf(false) }
     var sort by remember { mutableStateOf(Settings.tileSort) }
+    var pendingDelete by remember { mutableStateOf<Tile?>(null) }
 
     LaunchedEffect(Unit) { TileStore.load() }
 
@@ -126,6 +132,8 @@ fun HomeScreen(
                             sort = sort,
                             onQueryChange = { query = it },
                             onTileClick = onTileClick,
+                            onEditTile = onEditTile,
+                            onDeleteTile = { pendingDelete = it },
                             isRefreshing = isRefreshing,
                             onRefresh = {
                                 scope.launch {
@@ -139,6 +147,28 @@ fun HomeScreen(
             }
         }
     }
+
+    pendingDelete?.let { target ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Delete account?") },
+            text = { Text("\"${target.title}\" will be removed. This can't be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDelete = null
+                    scope.launch {
+                        TileStore.delete(target.id)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                }) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+            },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,6 +179,8 @@ private fun LoadedContent(
     sort: TileSort,
     onQueryChange: (String) -> Unit,
     onTileClick: (Tile) -> Unit,
+    onEditTile: (Tile) -> Unit,
+    onDeleteTile: (Tile) -> Unit,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
 ) {
@@ -176,7 +208,7 @@ private fun LoadedContent(
             if (sorted.isEmpty()) {
                 NoResults(query)
             } else {
-                TileGrid(sorted, onTileClick)
+                TileGrid(sorted, onTileClick, onEditTile, onDeleteTile)
             }
         }
     }
@@ -243,7 +275,12 @@ private fun fold(text: String): String =
         .lowercase()
 
 @Composable
-private fun TileGrid(tiles: List<Tile>, onTileClick: (Tile) -> Unit) {
+private fun TileGrid(
+    tiles: List<Tile>,
+    onTileClick: (Tile) -> Unit,
+    onEditTile: (Tile) -> Unit,
+    onDeleteTile: (Tile) -> Unit,
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -255,6 +292,8 @@ private fun TileGrid(tiles: List<Tile>, onTileClick: (Tile) -> Unit) {
             TileCard(
                 tile = tile,
                 onClick = { onTileClick(tile) },
+                onEdit = { onEditTile(tile) },
+                onDelete = { onDeleteTile(tile) },
                 modifier = Modifier.animateItem(),
             )
         }

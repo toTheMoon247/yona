@@ -28,9 +28,12 @@ fun SignedInApp(modifier: Modifier = Modifier) {
             existing = editing,
             onDismiss = { editTile = null },
             onSaved = {
-                // Return to the detail screen with the refreshed tile.
-                detailTile = (TileStore.tiles as? LoadState.Loaded)?.value
-                    ?.firstOrNull { it.id == editing.id }
+                // If editing from the detail screen, refresh & stay there; if from
+                // Home (no detail open), just return to Home.
+                if (detailTile != null) {
+                    detailTile = (TileStore.tiles as? LoadState.Loaded)?.value
+                        ?.firstOrNull { it.id == editing.id }
+                }
                 editTile = null
             },
         )
@@ -47,6 +50,7 @@ fun SignedInApp(modifier: Modifier = Modifier) {
         else -> HomeScreen(
             onAddClick = { showAdd = true },
             onTileClick = { detailTile = it },
+            onEditTile = { editTile = it },
             modifier = modifier,
         )
     }
