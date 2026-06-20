@@ -100,6 +100,12 @@ struct TileDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
+            if let source = tile.billingSource {
+                Label(billingText(source: source, method: tile.paymentMethod), systemImage: source.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
             Button {
                 showingSafari = true
             } label: {
@@ -156,6 +162,15 @@ struct TileDetailView: View {
             Color(.secondarySystemBackground),
             in: RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous)
         )
+    }
+
+    /// "Billed through App Store" or, when a payment method is set, "Billed direct · Visa ••1234".
+    private func billingText(source: BillingSource, method: String?) -> String {
+        let base = "Billed via \(source.label)"
+        guard source.usesPaymentMethod,
+              let method, !method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else { return base }
+        return "\(base) · \(method)"
     }
 
     private func websiteURL(_ tile: Tile) -> URL? {

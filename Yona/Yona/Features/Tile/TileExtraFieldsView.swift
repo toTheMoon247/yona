@@ -15,6 +15,8 @@ struct TileExtraFieldsView: View {
     @Binding var hasRenewalDate: Bool
     @Binding var renewalDate: Date
     @Binding var renewalRepeat: RenewalRepeat?
+    @Binding var billingSource: BillingSource?
+    @Binding var paymentMethod: String
 
     var body: some View {
         Section("Notes (optional)") {
@@ -34,7 +36,34 @@ struct TileExtraFieldsView: View {
             }
             .pickerStyle(.segmented)
         }
+        billingSection
         renewalSection
+    }
+
+    /// "How it's paid": where it's billed (lead) + an optional payment method that
+    /// only applies to non-store sources. We store a card type + last 4 only.
+    private var billingSection: some View {
+        Section {
+            Picker("Billed through", selection: $billingSource) {
+                Text("Not set").tag(BillingSource?.none)
+                ForEach(BillingSource.allCases) { source in
+                    Text(source.label).tag(BillingSource?.some(source))
+                }
+            }
+            if billingSource?.usesPaymentMethod ?? false {
+                TextField("Payment method (e.g. Visa ••1234)", text: $paymentMethod)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled()
+            }
+        } header: {
+            Text("How it's paid (optional)")
+        } footer: {
+            if billingSource?.usesPaymentMethod ?? false {
+                Text("For your reference only — enter a card type and the last 4 digits. Never store full card numbers.")
+            } else {
+                Text("Where this subscription is billed, so you know where to cancel or manage it.")
+            }
+        }
     }
 
     private var renewalSection: some View {

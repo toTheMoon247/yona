@@ -23,6 +23,8 @@ create table if not exists public.tiles (
   cost_period text check (cost_period in ('monthly', 'yearly')),
   renewal_date date,                                  -- optional renewal/due date
   renewal_repeat text check (renewal_repeat in ('monthly', 'yearly')), -- null = one-time
+  billing_source text check (billing_source in ('app_store', 'google_play', 'direct', 'bank', 'other')), -- where it's billed
+  payment_method text,                                 -- optional, card type + last 4 only (e.g. "Visa ••1234")
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );

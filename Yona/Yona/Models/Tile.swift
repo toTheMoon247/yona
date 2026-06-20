@@ -17,6 +17,42 @@ enum RenewalRepeat: String, Codable, CaseIterable, Hashable {
     case yearly
 }
 
+/// Where a subscription is billed — the most useful "how it's paid" fact, since it
+/// tells you where to cancel/manage it. Stored as a snake_case string in Postgres.
+enum BillingSource: String, Codable, CaseIterable, Identifiable, Hashable {
+    case appStore = "app_store"
+    case googlePlay = "google_play"
+    case direct
+    case bank
+    case other
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .appStore: return "App Store"
+        case .googlePlay: return "Google Play"
+        case .direct: return "Direct (website)"
+        case .bank: return "Bank debit"
+        case .other: return "Other"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .appStore: return "apple.logo"
+        case .googlePlay: return "play.circle"
+        case .direct: return "globe"
+        case .bank: return "building.columns"
+        case .other: return "creditcard"
+        }
+    }
+
+    /// Store-billed sources charge whatever card is on the store account, so a
+    /// per-subscription payment method doesn't apply.
+    var usesPaymentMethod: Bool { self != .appStore && self != .googlePlay }
+}
+
 struct Tile: Identifiable, Codable, Hashable {
     let id: UUID
     var title: String
@@ -27,6 +63,8 @@ struct Tile: Identifiable, Codable, Hashable {
     var costPeriod: CostPeriod?
     var renewalDate: Date?
     var renewalRepeat: RenewalRepeat?
+    var billingSource: BillingSource?
+    var paymentMethod: String?
     let createdAt: Date
     let updatedAt: Date
 
@@ -37,6 +75,8 @@ struct Tile: Identifiable, Codable, Hashable {
         case costPeriod = "cost_period"
         case renewalDate = "renewal_date"
         case renewalRepeat = "renewal_repeat"
+        case billingSource = "billing_source"
+        case paymentMethod = "payment_method"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }
@@ -50,6 +90,8 @@ struct Tile: Identifiable, Codable, Hashable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         costPeriod = try container.decodeIfPresent(CostPeriod.self, forKey: .costPeriod)
         renewalRepeat = try container.decodeIfPresent(RenewalRepeat.self, forKey: .renewalRepeat)
+        billingSource = try container.decodeIfPresent(BillingSource.self, forKey: .billingSource)
+        paymentMethod = try container.decodeIfPresent(String.self, forKey: .paymentMethod)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         // `numeric` may arrive as a JSON number or a string depending on the backend.

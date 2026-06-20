@@ -156,6 +156,8 @@ private struct TilePayload: Encodable {
     let costPeriod: String?
     let renewalDate: String?
     let renewalRepeat: String?
+    let billingSource: String?
+    let paymentMethod: String?
 
     enum CodingKeys: String, CodingKey {
         case title, url, notes
@@ -163,6 +165,8 @@ private struct TilePayload: Encodable {
         case costPeriod = "cost_period"
         case renewalDate = "renewal_date"
         case renewalRepeat = "renewal_repeat"
+        case billingSource = "billing_source"
+        case paymentMethod = "payment_method"
     }
 
     init(_ draft: TileDraft) {
@@ -173,6 +177,8 @@ private struct TilePayload: Encodable {
         costPeriod = draft.costPeriod?.rawValue
         renewalDate = draft.renewalDate.map { Tile.dateOnlyFormatter.string(from: $0) }
         renewalRepeat = draft.renewalRepeat?.rawValue
+        billingSource = draft.billingSource?.rawValue
+        paymentMethod = draft.paymentMethod
     }
 
     func encode(to encoder: Encoder) throws {
@@ -184,6 +190,8 @@ private struct TilePayload: Encodable {
         try container.encode(costPeriod, forKey: .costPeriod)
         try container.encode(renewalDate, forKey: .renewalDate)
         try container.encode(renewalRepeat, forKey: .renewalRepeat)
+        try container.encode(billingSource, forKey: .billingSource)
+        try container.encode(paymentMethod, forKey: .paymentMethod)
     }
 }
 

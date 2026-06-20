@@ -22,6 +22,8 @@ struct TileFormSheet: View {
     @State private var hasRenewalDate: Bool
     @State private var renewalDate: Date
     @State private var renewalRepeat: RenewalRepeat?
+    @State private var billingSource: BillingSource?
+    @State private var paymentMethod: String
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -37,6 +39,16 @@ struct TileFormSheet: View {
         _hasRenewalDate = State(initialValue: tile.renewalDate != nil)
         _renewalDate = State(initialValue: tile.renewalDate ?? Date())
         _renewalRepeat = State(initialValue: tile.renewalRepeat)
+        _billingSource = State(initialValue: tile.billingSource)
+        _paymentMethod = State(initialValue: tile.paymentMethod ?? "")
+    }
+
+    /// Trimmed payment method, but only when the billing source uses one
+    /// (store-billed subs ignore it) — otherwise nil so nothing is stored.
+    private var cleanPaymentMethod: String? {
+        guard billingSource?.usesPaymentMethod ?? false else { return nil }
+        let trimmed = paymentMethod.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -59,7 +71,9 @@ struct TileFormSheet: View {
                     costPeriod: $costPeriod,
                     hasRenewalDate: $hasRenewalDate,
                     renewalDate: $renewalDate,
-                    renewalRepeat: $renewalRepeat
+                    renewalRepeat: $renewalRepeat,
+                    billingSource: $billingSource,
+                    paymentMethod: $paymentMethod
                 )
                 if let errorMessage {
                     Section { Text(errorMessage).foregroundStyle(.red) }
@@ -97,7 +111,9 @@ struct TileFormSheet: View {
             costAmount: amount,
             costPeriod: period,
             renewalDate: hasRenewalDate ? renewalDate : nil,
-            renewalRepeat: hasRenewalDate ? renewalRepeat : nil
+            renewalRepeat: hasRenewalDate ? renewalRepeat : nil,
+            billingSource: billingSource,
+            paymentMethod: cleanPaymentMethod
         )
 
         do {

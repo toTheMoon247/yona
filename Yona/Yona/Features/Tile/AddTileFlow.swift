@@ -21,6 +21,8 @@ struct AddTileFlow: View {
     @State private var hasRenewalDate = false
     @State private var renewalDate = Date()
     @State private var renewalRepeat: RenewalRepeat?
+    @State private var billingSource: BillingSource?
+    @State private var paymentMethod = ""
 
     @State private var showDetails = false
     @State private var isSaving = false
@@ -88,7 +90,9 @@ struct AddTileFlow: View {
                 costPeriod: $costPeriod,
                 hasRenewalDate: $hasRenewalDate,
                 renewalDate: $renewalDate,
-                renewalRepeat: $renewalRepeat
+                renewalRepeat: $renewalRepeat,
+                billingSource: $billingSource,
+                paymentMethod: $paymentMethod
             )
             if let errorMessage {
                 Section { Text(errorMessage).foregroundStyle(.red) }
@@ -114,6 +118,14 @@ struct AddTileFlow: View {
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 
+    /// Trimmed payment method, but only when the billing source uses one
+    /// (store-billed subs ignore it) — otherwise nil so nothing is stored.
+    private var cleanPaymentMethod: String? {
+        guard billingSource?.usesPaymentMethod ?? false else { return nil }
+        let trimmed = paymentMethod.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     private func save() async {
         isSaving = true
         errorMessage = nil
@@ -128,7 +140,9 @@ struct AddTileFlow: View {
             costAmount: amount,
             costPeriod: period,
             renewalDate: hasRenewalDate ? renewalDate : nil,
-            renewalRepeat: hasRenewalDate ? renewalRepeat : nil
+            renewalRepeat: hasRenewalDate ? renewalRepeat : nil,
+            billingSource: billingSource,
+            paymentMethod: cleanPaymentMethod
         )
 
         do {
