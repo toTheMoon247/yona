@@ -16,7 +16,7 @@ create table if not exists public.tiles (
   id          uuid        primary key default gen_random_uuid(),
   user_id     uuid        not null default auth.uid() references auth.users(id) on delete cascade,
   title       text        not null check (length(trim(title)) > 0),
-  url         text        not null check (length(trim(url)) > 0),
+  url         text        not null,                   -- optional in the UI; "" when no website
   logo_url    text,                                   -- resolved once at create/edit
   notes       text,                                   -- Option A: single optional text field
   cost_amount numeric(12,2),                          -- optional cost tracking

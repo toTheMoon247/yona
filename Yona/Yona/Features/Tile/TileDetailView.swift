@@ -84,9 +84,11 @@ struct TileDetailView: View {
                 .font(.title.bold())
                 .multilineTextAlignment(.center)
 
-            Text(displayHost(tile))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            if hasWebsite(tile) {
+                Text(displayHost(tile))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             if let cost = tile.formattedCost {
                 Label(cost, systemImage: "creditcard")
@@ -106,16 +108,18 @@ struct TileDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            Button {
-                showingSafari = true
-            } label: {
-                Label("Open Website", systemImage: "safari")
-                    .frame(maxWidth: .infinity)
+            if hasWebsite(tile) {
+                Button {
+                    showingSafari = true
+                } label: {
+                    Label("Open Website", systemImage: "safari")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(websiteURL(tile) == nil)
+                .padding(.horizontal)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(websiteURL(tile) == nil)
-            .padding(.horizontal)
         }
     }
 
@@ -171,6 +175,10 @@ struct TileDetailView: View {
               let method, !method.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         else { return base }
         return "\(base) · \(method)"
+    }
+
+    private func hasWebsite(_ tile: Tile) -> Bool {
+        !tile.url.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private func websiteURL(_ tile: Tile) -> URL? {

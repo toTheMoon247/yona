@@ -75,6 +75,10 @@ struct TileLogoView: View {
     }
 
     private var fallback: some View {
-        LetterTileView(title: title, seed: seed)
+        // No website → no brand logo to ever load, so show the whole title in the
+        // circle rather than a lone initial. Tiles that have a URL keep the initial
+        // while their logo loads or if it fails.
+        let hasWebsite = !websiteURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return LetterTileView(title: title, seed: seed, usesFullTitle: !hasWebsite)
     }
 }

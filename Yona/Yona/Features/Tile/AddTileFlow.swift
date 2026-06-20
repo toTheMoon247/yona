@@ -30,7 +30,7 @@ struct AddTileFlow: View {
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedURL: String { urlText.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var canContinue: Bool { !trimmedTitle.isEmpty && !trimmedURL.isEmpty }
+    private var canContinue: Bool { !trimmedTitle.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -58,7 +58,7 @@ struct AddTileFlow: View {
             ServiceSearchField(title: $title, urlText: $urlText)
             Section {
                 TextField("Title", text: $title)
-                TextField("URL", text: $urlText)
+                TextField("URL (optional)", text: $urlText)
                     .keyboardType(.URL)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -114,6 +114,7 @@ struct AddTileFlow: View {
     }
 
     private var displayHost: String {
+        guard !trimmedURL.isEmpty else { return "No website" }
         guard let host = URL(string: URLHelpers.normalized(trimmedURL))?.host() else { return trimmedURL }
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }

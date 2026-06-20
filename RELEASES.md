@@ -7,6 +7,20 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## ios-v0.6.1 — iOS: Optional URL · 2026-06-21
+
+A subscription no longer requires a website — the first real tester (a building
+maintenance fee) hit the old "URL required" wall immediately.
+
+- **URL is optional** in add & edit; only a Title is required.
+- **No website → the full title fills the circle** (fitted, up to 3 lines) instead
+  of a lone initial; the detail screen hides the host line + "Open Website" button.
+- Tiles that have a URL are unchanged (brand logo, with the initial as fallback).
+- DB migration `0005_optional_url` drops the non-empty-URL check (column stays
+  NOT NULL, may be "").
+
+Build 3 (version 1.0). Android mirror pending on `android-v*`.
+
 ## ios-v0.6.0 — iOS: Apple Sign-In, paywall & how-it's-paid · 2026-06-20
 
 First prefixed iOS tag (continues from legacy `v0.5.0`). The TestFlight-ready batch:

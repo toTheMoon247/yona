@@ -186,6 +186,16 @@ a spend-by-source breakdown. Build after the store launches.
 
 ---
 
+## 13. Premium badge  _(idea — deferred)_
+
+A subtle indicator that a user is on Premium, so paying users feel recognized —
+**nothing flashy**. Candidate spots: a small ✦ sparkle beside the app name in the
+top bar, and/or a non-tappable "Premium" row at the top of the account (⋯) menu
+where free users see "Upgrade to Premium." Build alongside real RevenueCat
+entitlements (so it reflects an actual paid state, not just the dev toggle).
+
+---
+
 ## Already tracked elsewhere (Future / Pro)
 
 From the original spec, beyond the above: **Family Vault** (share tiles with

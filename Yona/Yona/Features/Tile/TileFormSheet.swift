@@ -53,14 +53,14 @@ struct TileFormSheet: View {
 
     private var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
     private var trimmedURL: String { urlText.trimmingCharacters(in: .whitespacesAndNewlines) }
-    private var canSave: Bool { !trimmedTitle.isEmpty && !trimmedURL.isEmpty && !isSaving }
+    private var canSave: Bool { !trimmedTitle.isEmpty && !isSaving }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     TextField("Title", text: $title)
-                    TextField("URL", text: $urlText)
+                    TextField("URL (optional)", text: $urlText)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
