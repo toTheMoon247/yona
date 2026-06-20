@@ -7,6 +7,25 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## ios-v0.6.0 — iOS: Apple Sign-In, paywall & how-it's-paid · 2026-06-20
+
+First prefixed iOS tag (continues from legacy `v0.5.0`). The TestFlight-ready batch:
+
+- **Sign in with Apple** — native ID-token flow (CryptoKit nonce), replacing the stub,
+  now that the Apple Developer Program is approved. Export-compliance flag declared.
+- **Paywall + freemium gate** — free up to 4 subscriptions; the 5th opens a paywall
+  (yearly / lifetime, placeholder prices). RevenueCat + real purchases come later;
+  the buy action is a DEBUG dev-unlock for now. Existing subs are grandfathered.
+- **Spend-hero header** — exact yearly total ("You pay $X a year") with the monthly /
+  yearly split and a count per bucket; subtle "Yona: Subscription Tracker" brand mark.
+- **"Subscriptions" rename** — user-facing "account"/"tile" → "subscription" app-wide.
+- **How it's paid** — optional *Billed through* (App Store · Google Play · Direct ·
+  Bank · Other) + optional *Payment method* (card type + last 4 only, never full
+  numbers; shown only for non-store sources). DB migration `0004_payment_info`.
+
+Build 2 (version 1.0) is archived from this tag. Android mirror of the paywall/header/
+how-it's-paid is still pending on its own `android-v*` cadence.
+
 ## android-v0.5.0 — Android: Documents (full iOS parity) · 2026-06-19
 
 Phase A8 — attach documents to a tile. **Android now matches the iOS feature set.**
