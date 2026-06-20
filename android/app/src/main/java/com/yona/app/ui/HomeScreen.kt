@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,9 +60,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.yona.app.core.AuthStore
+import com.yona.app.core.CostPeriod
 import com.yona.app.core.LoadState
 import com.yona.app.core.Settings
 import com.yona.app.core.Tile
@@ -93,7 +101,7 @@ fun HomeScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Yona") },
+                title = { BrandMark() },
                 actions = {
                     IconButton(onClick = { scope.launch { TileStore.load() } }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -186,7 +194,6 @@ private fun LoadedContent(
 ) {
     val filtered = remember(tiles, query) { tiles.filter { it.matches(query) } }
     val sorted = remember(filtered, sort) { sort.sorted(filtered) }
-    val monthlyTotal = remember(tiles) { tiles.sumOf { it.monthlyCost ?: 0.0 } }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -194,21 +201,100 @@ private fun LoadedContent(
         modifier = Modifier.fillMaxSize(),
     ) {
         Column(Modifier.fillMaxSize()) {
-            if (monthlyTotal > 0.0) {
-                Text(
-                    text = "Estimated ${formatCurrency(monthlyTotal)} / month",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 8.dp),
-                )
-            }
+            SpendHeader(tiles)
             SearchField(query = query, onQueryChange = onQueryChange)
             if (sorted.isEmpty()) {
                 NoResults(query)
             } else {
                 TileGrid(sorted, onTileClick, onEditTile, onDeleteTile)
+            }
+        }
+    }
+}
+
+/**
+ * Spend hero: the exact total per year (monthly × 12 + yearly), with the monthly /
+ * yearly split and a count per bucket. Computed over all subscriptions. Mirrors iOS.
+ */
+@Composable
+private fun SpendHeader(tiles: List<Tile>) {
+    val monthlySubs = tiles.filter { it.costPeriod == CostPeriod.MONTHLY && it.costAmount != null }
+    val yearlySubs = tiles.filter { it.costPeriod == CostPeriod.YEARLY && it.costAmount != null }
+    val monthlyTotal = monthlySubs.sumOf { it.costAmount ?: 0.0 }
+    val yearlyTotal = yearlySubs.sumOf { it.costAmount ?: 0.0 }
+    val annualTotal = monthlyTotal * 12 + yearlyTotal
+    if (annualTotal <= 0.0) return
+
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+
+    val buckets = buildList {
+        if (monthlyTotal > 0) add("${formatCurrency(monthlyTotal)}/mo · ${subCount(monthlySubs.size)}")
+        if (yearlyTotal > 0) add("${formatCurrency(yearlyTotal)}/yr · ${subCount(yearlySubs.size)}")
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+    ) {
+        Text(
+            text = "You pay",
+            style = MaterialTheme.typography.bodyMedium,
+            color = onSurfaceVariant,
+        )
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, color = onSurface)) {
+                    append(formatCurrency(annualTotal))
+                }
+                withStyle(SpanStyle(fontSize = 18.sp, color = onSurfaceVariant)) {
+                    append(" a year")
+                }
+            },
+        )
+        Text(
+            text = buckets.joinToString("   ·   "),
+            style = MaterialTheme.typography.bodyMedium,
+            color = onSurfaceVariant,
+        )
+    }
+}
+
+private fun subCount(count: Int): String = "$count sub${if (count == 1) "" else "s"}"
+
+/** The Home brand mark: a small 2×2 grid glyph + the full app name (mirrors iOS). */
+@Composable
+private fun BrandMark() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BrandGridIcon()
+        Text(
+            text = "Yona: Subscription Tracker",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun BrandGridIcon() {
+    val color = MaterialTheme.colorScheme.primary
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        repeat(2) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                repeat(2) {
+                    Box(
+                        Modifier
+                            .size(7.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(color),
+                    )
+                }
             }
         }
     }
