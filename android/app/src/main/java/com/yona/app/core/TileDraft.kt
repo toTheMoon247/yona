@@ -12,4 +12,6 @@ data class TileDraft(
     val costPeriod: String? = null,
     val renewalDate: String? = null,
     val renewalRepeat: String? = null,
+    val billingSource: String? = null,
+    val paymentMethod: String? = null,
 )

@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.yona.app.core.BillingSource
 import com.yona.app.core.Logos
 import com.yona.app.core.Tile
 import com.yona.app.core.TileStore
@@ -144,6 +145,20 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
             tile.renewalSummary?.let { renews ->
                 Text(
                     text = "Renews $renews",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            BillingSource.fromRaw(tile.billingSource)?.let { source ->
+                val method = tile.paymentMethod?.takeIf { it.isNotBlank() }
+                val text = if (source.usesPaymentMethod && method != null) {
+                    "Billed via ${source.label} · $method"
+                } else {
+                    "Billed via ${source.label}"
+                }
+                Text(
+                    text = text,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -24,6 +24,8 @@ data class Tile(
     @SerialName("cost_period") val costPeriod: String? = null,
     @SerialName("renewal_date") val renewalDate: String? = null,
     @SerialName("renewal_repeat") val renewalRepeat: String? = null,
+    @SerialName("billing_source") val billingSource: String? = null,
+    @SerialName("payment_method") val paymentMethod: String? = null,
     @SerialName("created_at") val createdAt: String,
 ) {
     /** First letter of the title for the placeholder logo. */
@@ -98,6 +100,26 @@ object CostPeriod {
 object RenewalRepeat {
     const val MONTHLY = "monthly"
     const val YEARLY = "yearly"
+}
+
+/**
+ * Where a subscription is billed — the lead "how it's paid" fact (it says where to
+ * cancel/manage it). Stored as the snake_case [raw] string in Postgres. Mirrors iOS.
+ */
+enum class BillingSource(val raw: String, val label: String) {
+    APP_STORE("app_store", "App Store"),
+    GOOGLE_PLAY("google_play", "Google Play"),
+    DIRECT("direct", "Direct (website)"),
+    BANK("bank", "Bank debit"),
+    OTHER("other", "Other"),
+    ;
+
+    /** Store-billed sources charge the store account, so a per-sub payment method doesn't apply. */
+    val usesPaymentMethod: Boolean get() = this != APP_STORE && this != GOOGLE_PLAY
+
+    companion object {
+        fun fromRaw(raw: String?): BillingSource? = entries.firstOrNull { it.raw == raw }
+    }
 }
 
 /** Formats an amount in the device's locale currency, e.g. "$15.00". */

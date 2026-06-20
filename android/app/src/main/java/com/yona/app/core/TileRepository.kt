@@ -15,7 +15,8 @@ object TileRepository {
 
     private val columns = Columns.list(
         "id", "title", "url", "logo_url", "notes",
-        "cost_amount", "cost_period", "renewal_date", "renewal_repeat", "created_at",
+        "cost_amount", "cost_period", "renewal_date", "renewal_repeat",
+        "billing_source", "payment_method", "created_at",
     )
 
     /** All of the current user's tiles, newest first. */
@@ -64,6 +65,8 @@ private data class TilePayload(
     @SerialName("cost_period") val costPeriod: String?,
     @SerialName("renewal_date") val renewalDate: String?,
     @SerialName("renewal_repeat") val renewalRepeat: String?,
+    @SerialName("billing_source") val billingSource: String?,
+    @SerialName("payment_method") val paymentMethod: String?,
 ) {
     constructor(draft: TileDraft) : this(
         title = draft.title,
@@ -73,5 +76,7 @@ private data class TilePayload(
         costPeriod = draft.costPeriod,
         renewalDate = draft.renewalDate,
         renewalRepeat = draft.renewalRepeat,
+        billingSource = draft.billingSource,
+        paymentMethod = draft.paymentMethod,
     )
 }

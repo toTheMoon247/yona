@@ -18,11 +18,15 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -45,6 +49,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.yona.app.core.BillingSource
 import com.yona.app.core.CostPeriod
 import com.yona.app.core.RenewalRepeat
 import com.yona.app.core.Tile
@@ -85,6 +90,9 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     var period by rememberSaveable { mutableStateOf(existing?.costPeriod ?: CostPeriod.MONTHLY) }
     var renewalDate by rememberSaveable { mutableStateOf(existing?.renewalDate) }
     var renewalRepeat by rememberSaveable { mutableStateOf(existing?.renewalRepeat) }
+    var billingRaw by rememberSaveable { mutableStateOf(existing?.billingSource) }
+    var paymentMethod by rememberSaveable { mutableStateOf(existing?.paymentMethod ?: "") }
+    var billingExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -103,6 +111,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
             saving = true
             error = null
             val amount = costText.trim().toDoubleOrNull()?.takeIf { it > 0 }
+            val source = BillingSource.fromRaw(billingRaw)
             val draft = TileDraft(
                 title = title.trim(),
                 url = UrlHelpers.normalized(url),
@@ -111,6 +120,9 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                 costPeriod = if (amount != null) period else null,
                 renewalDate = renewalDate,
                 renewalRepeat = if (renewalDate != null) renewalRepeat else null,
+                billingSource = billingRaw,
+                // Only store a payment method for sources that use one; clear it otherwise.
+                paymentMethod = if (source?.usesPaymentMethod == true) paymentMethod.trim().ifBlank { null } else null,
             )
             val result = if (existing != null) {
                 TileStore.update(existing.id, draft)
@@ -282,6 +294,64 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                     TextButton(onClick = { showDatePicker = true }, enabled = !saving) {
                         Text("Pick a date…")
                     }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "How it's paid (optional)",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val billingSource = BillingSource.fromRaw(billingRaw)
+                ExposedDropdownMenuBox(
+                    expanded = billingExpanded,
+                    onExpandedChange = { if (!saving) billingExpanded = it },
+                ) {
+                    OutlinedTextField(
+                        value = billingSource?.label ?: "Not set",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Billed through") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = billingExpanded)
+                        },
+                        enabled = !saving,
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .fillMaxWidth(),
+                    )
+                    ExposedDropdownMenu(
+                        expanded = billingExpanded,
+                        onDismissRequest = { billingExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Not set") },
+                            onClick = { billingRaw = null; billingExpanded = false },
+                        )
+                        BillingSource.entries.forEach { source ->
+                            DropdownMenuItem(
+                                text = { Text(source.label) },
+                                onClick = { billingRaw = source.raw; billingExpanded = false },
+                            )
+                        }
+                    }
+                }
+                if (billingSource?.usesPaymentMethod == true) {
+                    OutlinedTextField(
+                        value = paymentMethod,
+                        onValueChange = { paymentMethod = it },
+                        label = { Text("Payment method") },
+                        placeholder = { Text("e.g. Visa ••1234") },
+                        singleLine = true,
+                        enabled = !saving,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        text = "Card type + last 4 only — never full card numbers.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
 
