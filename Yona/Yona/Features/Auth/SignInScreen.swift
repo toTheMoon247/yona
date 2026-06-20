@@ -3,10 +3,13 @@
 //  Yona
 //
 
+import AuthenticationServices
 import SwiftUI
 
 struct SignInScreen: View {
     @Environment(AuthStore.self) private var auth
+
+    @State private var currentNonce: String?
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.l) {
@@ -38,19 +41,18 @@ struct SignInScreen: View {
                 .controlSize(.large)
                 .disabled(auth.isAuthenticating)
 
-                Button {
-                    // Stub: enabled once the Apple Developer Program is active (Phase 5).
-                } label: {
-                    Label("Continue with Apple", systemImage: "apple.logo")
-                        .frame(maxWidth: .infinity)
+                SignInWithAppleButton(.continue) { request in
+                    let nonce = NonceGenerator.random()
+                    currentNonce = nonce
+                    request.requestedScopes = [.fullName, .email]
+                    request.nonce = NonceGenerator.sha256(nonce)
+                } onCompletion: { result in
+                    handleAppleResult(result)
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .disabled(true)
-
-                Text("Apple sign-in coming soon")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                .signInWithAppleButtonStyle(.black)
+                .frame(height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous))
+                .disabled(auth.isAuthenticating)
 
                 if auth.isAuthenticating {
                     ProgressView().padding(.top, DesignTokens.Spacing.s)
@@ -67,5 +69,21 @@ struct SignInScreen: View {
             .padding(.bottom, DesignTokens.Spacing.xl)
         }
         .padding()
+    }
+
+    private func handleAppleResult(_ result: Result<ASAuthorization, Error>) {
+        switch result {
+        case let .success(authorization):
+            guard
+                let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                let tokenData = credential.identityToken,
+                let idToken = String(data: tokenData, encoding: .utf8),
+                let nonce = currentNonce
+            else { return }
+            Task { await auth.signInWithApple(idToken: idToken, nonce: nonce) }
+        case let .failure(error):
+            // User cancelled or closed the sheet — not a real error.
+            if (error as? ASAuthorizationError)?.code == .canceled { return }
+        }
     }
 }

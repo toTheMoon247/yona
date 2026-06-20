@@ -82,6 +82,28 @@ final class AuthStore {
         }
     }
 
+    /// Complete a native Sign in with Apple: exchange the Apple identity token for a
+    /// Supabase session. `nonce` is the *raw* nonce (Apple signed its SHA-256 hash).
+    func signInWithApple(idToken: String, nonce: String) async {
+        isAuthenticating = true
+        errorMessage = nil
+        defer { isAuthenticating = false }
+
+        do {
+            try await client.auth.signInWithIdToken(
+                credentials: .init(provider: .apple, idToken: idToken, nonce: nonce)
+            )
+            // `authStateChanges` flips `sessionState` to .signedIn.
+        } catch {
+            #if DEBUG
+            print("Apple sign-in error:", error)
+            errorMessage = "Sign-in failed: \(error)"
+            #else
+            errorMessage = "Sign-in failed. Please try again."
+            #endif
+        }
+    }
+
     func signOut() async {
         do {
             try await client.auth.signOut()
