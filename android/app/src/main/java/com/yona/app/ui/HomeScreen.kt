@@ -111,7 +111,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
-                Icon(Icons.Default.Add, contentDescription = "Add account")
+                Icon(Icons.Default.Add, contentDescription = "Add subscription")
             }
         },
     ) { innerPadding ->
@@ -151,7 +151,7 @@ fun HomeScreen(
     pendingDelete?.let { target ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete account?") },
+            title = { Text("Delete subscription?") },
             text = { Text("\"${target.title}\" will be removed. This can't be undone.") },
             confirmButton = {
                 TextButton(onClick = {
@@ -359,10 +359,10 @@ private fun EmptyState() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("No accounts yet", style = MaterialTheme.typography.titleMedium)
+        Text("No subscriptions yet", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Your saved accounts will appear here.",
+            text = "Your subscriptions will appear here.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

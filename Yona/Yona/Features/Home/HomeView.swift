@@ -12,10 +12,12 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AuthStore.self) private var auth
     @Environment(TileStore.self) private var tileStore
+    @Environment(EntitlementStore.self) private var entitlement
 
     @AppStorage("tileSort") private var sortOption: TileSort = .recentlyAdded
     @State private var searchText = ""
     @State private var showingCreate = false
+    @State private var showingPaywall = false
     @State private var editingTile: Tile?
     @State private var pendingDelete: Tile?
 
@@ -31,7 +33,8 @@ struct HomeView: View {
                 .navigationDestination(for: Tile.self) { tile in
                     TileDetailView(tileID: tile.id)
                 }
-                .navigationTitle("Yona")
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
                 .searchable(text: $searchText, prompt: "Search")
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
@@ -45,8 +48,31 @@ struct HomeView: View {
                             Image(systemName: "arrow.up.arrow.down")
                         }
                     }
+                    ToolbarItem(placement: .principal) {
+                        HStack(spacing: DesignTokens.Spacing.xs) {
+                            Image(systemName: "square.grid.2x2.fill")
+                                .foregroundStyle(.tint)
+                                .font(.subheadline)
+                            Text("Yona: Subscription Tracker")
+                                .font(.subheadline.weight(.semibold))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
+                            if !entitlement.isPremium {
+                                Button {
+                                    showingPaywall = true
+                                } label: {
+                                    Label("Upgrade to Premium", systemImage: "sparkles")
+                                }
+                            }
+                            #if DEBUG
+                            Button("Dev: \(entitlement.isPremium ? "Disable" : "Enable") Premium") {
+                                entitlement.setDevPremium(!entitlement.isPremium)
+                            }
+                            #endif
                             Button("Sign out", role: .destructive) {
                                 Task { await auth.signOut() }
                             }
@@ -56,6 +82,9 @@ struct HomeView: View {
                     }
                 }
                 .task { await tileStore.load() }
+                .sheet(isPresented: $showingPaywall) {
+                    PaywallView()
+                }
                 .sheet(isPresented: $showingCreate) {
                     AddTileFlow()
                 }
@@ -63,7 +92,7 @@ struct HomeView: View {
                     TileFormSheet(tile: tile)
                 }
                 .confirmationDialog(
-                    "Delete this tile?",
+                    "Delete this subscription?",
                     isPresented: deleteDialogBinding,
                     presenting: pendingDelete
                 ) { tile in
@@ -110,7 +139,7 @@ struct HomeView: View {
 
     private func grid(_ items: [Tile]) -> some View {
         ScrollView {
-            costSummary(items)
+            spendHeader
             LazyVGrid(columns: columns, spacing: DesignTokens.Spacing.l) {
                 ForEach(items) { tile in
                     NavigationLink(value: tile) {
@@ -148,36 +177,68 @@ struct HomeView: View {
         }
     }
 
-    @ViewBuilder
-    private func costSummary(_ items: [Tile]) -> some View {
-        let total = items.compactMap(\.monthlyCost).reduce(0, +)
-        let count = items.filter { $0.monthlyCost != nil }.count
-        if total > 0 {
-            HStack(spacing: DesignTokens.Spacing.xs) {
-                Image(systemName: "creditcard")
-                Text("≈ \(total.formatted(.currency(code: Tile.currencyCode)))/mo")
-                    .fontWeight(.medium)
-                Text("· \(count) paid")
-                Spacer()
-            }
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, DesignTokens.Spacing.l)
-            .padding(.top, DesignTokens.Spacing.s)
+    /// Spend hero: the exact total per year (monthly × 12 + yearly), with the exact
+    /// monthly/yearly billing split and a subscription count per bucket. Computed over
+    /// all subscriptions so it's stable while searching.
+    private var spendHeader: some View {
+        let items = tileStore.tiles.value ?? []
+        let code = Tile.currencyCode
+
+        let monthlySubs = items.filter { $0.costPeriod == .monthly && $0.costAmount != nil }
+        let yearlySubs = items.filter { $0.costPeriod == .yearly && $0.costAmount != nil }
+        let monthlyTotal = monthlySubs.compactMap(\.costAmount).reduce(0, +)
+        let yearlyTotal = yearlySubs.compactMap(\.costAmount).reduce(0, +)
+        let annualTotal = monthlyTotal * 12 + yearlyTotal
+
+        var parts: [String] = []
+        if monthlyTotal > 0 {
+            parts.append("\(monthlyTotal.formatted(.currency(code: code)))/mo · \(subCount(monthlySubs.count))")
         }
+        if yearlyTotal > 0 {
+            parts.append("\(yearlyTotal.formatted(.currency(code: code)))/yr · \(subCount(yearlySubs.count))")
+        }
+
+        return VStack(alignment: .leading, spacing: 2) {
+            if annualTotal > 0 {
+                Text("You pay")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                (
+                    Text(annualTotal.formatted(.currency(code: code)))
+                        .font(.largeTitle.bold())
+                    + Text(" a year")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                )
+                .contentTransition(.numericText())
+                Text(parts.joined(separator: "   ·   "))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+            } else {
+                Text("\(items.count) subscription\(items.count == 1 ? "" : "s")")
+                    .font(.largeTitle.bold())
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, DesignTokens.Spacing.l)
+        .padding(.top, DesignTokens.Spacing.s)
+        .padding(.bottom, DesignTokens.Spacing.xs)
     }
+
+    private func subCount(_ count: Int) -> String { "\(count) sub\(count == 1 ? "" : "s")" }
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("No tiles yet", systemImage: "square.grid.2x2")
+            Label("No subscriptions yet", systemImage: "square.grid.2x2")
         } description: {
-            Text("Tap + to add your first account.")
+            Text("Tap + to add your first subscription.")
         }
     }
 
     private var errorState: some View {
         ContentUnavailableView {
-            Label("Couldn't load your tiles", systemImage: "exclamationmark.triangle")
+            Label("Couldn't load your subscriptions", systemImage: "exclamationmark.triangle")
         } description: {
             Text("Check your connection and try again.")
         } actions: {
@@ -190,7 +251,12 @@ struct HomeView: View {
 
     private var createButton: some View {
         Button {
-            showingCreate = true
+            let count = tileStore.tiles.value?.count ?? 0
+            if entitlement.canAddTile(currentCount: count) {
+                showingCreate = true
+            } else {
+                showingPaywall = true
+            }
         } label: {
             Image(systemName: "plus")
                 .font(.title2.weight(.semibold))
@@ -200,7 +266,7 @@ struct HomeView: View {
                 .shadow(radius: 4, y: 2)
         }
         .padding(DesignTokens.Spacing.l)
-        .accessibilityLabel("Add tile")
+        .accessibilityLabel("Add subscription")
     }
 
     private var deleteDialogBinding: Binding<Bool> {

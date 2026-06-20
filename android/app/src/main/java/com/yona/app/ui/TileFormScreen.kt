@@ -133,7 +133,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (editing) "Edit account" else "Add account") },
+                title = { Text(if (editing) "Edit subscription" else "Add subscription") },
                 navigationIcon = {
                     IconButton(onClick = onDismiss, enabled = !saving) {
                         Icon(Icons.Default.Close, contentDescription = "Close")

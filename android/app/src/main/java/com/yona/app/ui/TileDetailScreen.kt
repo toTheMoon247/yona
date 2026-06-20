@@ -167,7 +167,7 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { if (!deleting) confirmDelete = false },
-            title = { Text("Delete account?") },
+            title = { Text("Delete subscription?") },
             text = { Text("\"${tile.title}\" will be removed. This can't be undone.") },
             confirmButton = {
                 TextButton(

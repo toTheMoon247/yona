@@ -42,7 +42,7 @@ fun SignInScreen(modifier: Modifier = Modifier) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "All your important accounts, in one place.",
+                text = "All your subscriptions, in one place.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

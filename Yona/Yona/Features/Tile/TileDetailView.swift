@@ -59,7 +59,7 @@ struct TileDetailView: View {
         .sheet(isPresented: $editing) {
             TileFormSheet(tile: tile)
         }
-        .confirmationDialog("Delete this tile?", isPresented: $confirmingDelete) {
+        .confirmationDialog("Delete this subscription?", isPresented: $confirmingDelete) {
             Button("Delete", role: .destructive) {
                 Task {
                     await tileStore.delete(tile)
@@ -134,7 +134,7 @@ struct TileDetailView: View {
     }
 
     private func createdFooter(_ tile: Tile) -> some View {
-        Text("Tile created \(tile.createdAt.formatted(date: .abbreviated, time: .omitted))")
+        Text("Added \(tile.createdAt.formatted(date: .abbreviated, time: .omitted))")
             .font(.caption)
             .foregroundStyle(.tertiary)
             .frame(maxWidth: .infinity, alignment: .leading)

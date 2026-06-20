@@ -31,7 +31,7 @@ object TileStore {
             onFailure = { error ->
                 // Don't blow away an existing (or cached) list on a silent refresh failure.
                 if (tiles !is LoadState.Loaded) {
-                    tiles = LoadState.Failed(error.message ?: "Couldn't load your accounts.")
+                    tiles = LoadState.Failed(error.message ?: "Couldn't load your subscriptions.")
                 }
             },
         )

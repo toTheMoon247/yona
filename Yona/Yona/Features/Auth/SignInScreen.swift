@@ -22,7 +22,7 @@ struct SignInScreen: View {
             Text("Yona")
                 .font(.largeTitle.bold())
 
-            Text("All your important accounts, in one place.")
+            Text("All your subscriptions, in one place.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

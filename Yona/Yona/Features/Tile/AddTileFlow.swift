@@ -33,7 +33,7 @@ struct AddTileFlow: View {
     var body: some View {
         NavigationStack {
             serviceStep
-                .navigationTitle("Add a service")
+                .navigationTitle("New Subscription")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {

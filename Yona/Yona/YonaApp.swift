@@ -10,6 +10,7 @@ struct YonaApp: App {
     @State private var repository: SupabaseRepository
     @State private var auth: AuthStore
     @State private var tiles: TileStore
+    @State private var entitlement = EntitlementStore()
 
     init() {
         // Roomier on-disk image cache so brand logos persist across launches.
@@ -27,6 +28,7 @@ struct YonaApp: App {
                 .environment(repository)
                 .environment(auth)
                 .environment(tiles)
+                .environment(entitlement)
         }
     }
 }
