@@ -15,6 +15,14 @@ val secretsProps = Properties().apply {
 fun secret(key: String): String =
     (secretsProps.getProperty(key) ?: System.getenv(key) ?: "").trim()
 
+// Release signing config from a gitignored keystore.properties. Absent (e.g. on CI),
+// the release build is simply left unsigned.
+val keystoreProps = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val hasReleaseKeystore = keystoreProps.getProperty("storeFile") != null
+
 android {
     namespace = "com.yona.app"
     compileSdk {
@@ -37,10 +45,24 @@ android {
         buildConfigField("String", "BRANDFETCH_CLIENT_ID", "\"${secret("BRANDFETCH_CLIENT_ID")}\"")
     }
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            if (hasReleaseKeystore) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }

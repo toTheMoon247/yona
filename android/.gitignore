@@ -17,3 +17,9 @@ local.properties
 # Local secrets — never commit (template: secrets.example.properties)
 /secrets.properties
 secrets.properties
+
+# Release signing — never commit (template: keystore.example.properties)
+/keystore.properties
+keystore.properties
+*.jks
+*.keystore
