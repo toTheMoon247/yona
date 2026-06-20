@@ -169,6 +169,21 @@ several people's vaults.
   all the ideas: a multi-owner data model, sharing + permissions, RLS rework (who
   can see whose tiles), and an account-switcher UI. A real project, not a quick add.
 
+## 12. How a subscription is paid  _(idea)_
+
+Optionally record how each subscription is paid, in two parts:
+
+- **Billed through** — App Store · Google Play · Direct (website) · Bank debit ·
+  Other. The most useful part: it tells you *where to cancel/manage it*.
+- **Payment method** (optional) — e.g. Visa ••1234, PayPal. Mainly for Direct/Bank
+  subscriptions; not needed for App Store / Google Play (those charge whatever's on
+  your store account). **Store only the card type + last 4 digits — never full card
+  numbers.**
+
+Billing source is the lead; payment method is the optional companion (you'd fill
+both for a card-on-website sub like Netflix). Show it on the detail screen; later,
+a spend-by-source breakdown. Build after the store launches.
+
 ---
 
 ## Already tracked elsewhere (Future / Pro)
