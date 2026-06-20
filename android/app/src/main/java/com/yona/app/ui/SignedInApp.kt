@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.yona.app.core.Entitlement
 import com.yona.app.core.LoadState
 import com.yona.app.core.Tile
 import com.yona.app.core.TileStore
@@ -18,12 +19,19 @@ import com.yona.app.core.TileStore
 @Composable
 fun SignedInApp(modifier: Modifier = Modifier) {
     var showAdd by remember { mutableStateOf(false) }
+    var showPaywall by remember { mutableStateOf(false) }
     var detailTile by remember { mutableStateOf<Tile?>(null) }
     var editTile by remember { mutableStateOf<Tile?>(null) }
+
+    fun requestAdd() {
+        val count = (TileStore.tiles as? LoadState.Loaded)?.value?.size ?: 0
+        if (Entitlement.canAdd(count)) showAdd = true else showPaywall = true
+    }
 
     val editing = editTile
     val tile = detailTile
     when {
+        showPaywall -> PaywallScreen(onDismiss = { showPaywall = false })
         editing != null -> TileFormScreen(
             existing = editing,
             onDismiss = { editTile = null },
@@ -48,7 +56,8 @@ fun SignedInApp(modifier: Modifier = Modifier) {
             onEdit = { editTile = tile },
         )
         else -> HomeScreen(
-            onAddClick = { showAdd = true },
+            onAddClick = { requestAdd() },
+            onUpgrade = { showPaywall = true },
             onTileClick = { detailTile = it },
             onEditTile = { editTile = it },
             modifier = modifier,

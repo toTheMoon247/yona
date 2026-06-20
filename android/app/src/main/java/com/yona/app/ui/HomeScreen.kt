@@ -68,8 +68,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yona.app.BuildConfig
 import com.yona.app.core.AuthStore
 import com.yona.app.core.CostPeriod
+import com.yona.app.core.Entitlement
 import com.yona.app.core.LoadState
 import com.yona.app.core.Settings
 import com.yona.app.core.Tile
@@ -83,6 +85,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onAddClick: () -> Unit,
+    onUpgrade: () -> Unit,
     onTileClick: (Tile) -> Unit,
     onEditTile: (Tile) -> Unit,
     modifier: Modifier = Modifier,
@@ -112,6 +115,7 @@ fun HomeScreen(
                             sort = it
                             Settings.tileSort = it
                         },
+                        onUpgrade = onUpgrade,
                         onSignOut = { scope.launch { AuthStore.signOut() } },
                     )
                 },
@@ -478,6 +482,7 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
 private fun OverflowMenu(
     currentSort: TileSort,
     onSortSelected: (TileSort) -> Unit,
+    onUpgrade: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -508,6 +513,24 @@ private fun OverflowMenu(
             )
         }
         HorizontalDivider()
+        if (!Entitlement.isPremium) {
+            DropdownMenuItem(
+                text = { Text("Upgrade to Premium") },
+                onClick = {
+                    expanded = false
+                    onUpgrade()
+                },
+            )
+        }
+        if (BuildConfig.DEBUG) {
+            DropdownMenuItem(
+                text = { Text("Dev: ${if (Entitlement.isPremium) "Disable" else "Enable"} Premium") },
+                onClick = {
+                    expanded = false
+                    Entitlement.setDevPremium(!Entitlement.isPremium)
+                },
+            )
+        }
         DropdownMenuItem(
             text = { Text("Sign out") },
             onClick = {
