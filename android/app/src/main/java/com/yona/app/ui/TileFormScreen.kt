@@ -89,7 +89,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    val canSave = title.isNotBlank() && url.isNotBlank() && !saving
+    val canSave = title.isNotBlank() && !saving
 
     BackHandler(enabled = !saving) { onDismiss() }
 
@@ -180,7 +180,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("Website") },
+                label = { Text("Website (optional)") },
                 placeholder = { Text("netflix.com") },
                 singleLine = true,
                 enabled = !saving,

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,8 +38,10 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -136,7 +139,8 @@ fun TileLogo(tile: Tile, modifier: Modifier = Modifier) {
     Box(modifier.clip(CircleShape)) {
         LogoImage(brandfetchUrl, tile) {
             LogoImage(faviconUrl, tile) {
-                LetterTile(tile, Modifier.fillMaxSize())
+                // No website → no brand logo to load; show the full title in the circle.
+                LetterTile(tile, Modifier.fillMaxSize(), usesFullTitle = !tile.hasWebsite)
             }
         }
     }
@@ -162,19 +166,39 @@ private fun LogoImage(url: String?, tile: Tile, fallback: @Composable () -> Unit
 }
 
 @Composable
-private fun LetterTile(tile: Tile, modifier: Modifier = Modifier) {
+private fun LetterTile(tile: Tile, modifier: Modifier = Modifier, usesFullTitle: Boolean = false) {
     val color = letterTileColor(tile.id)
     Box(
         modifier = modifier.background(Brush.verticalGradient(listOf(color, color.darken(0.18f)))),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = tile.initial,
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            modifier = Modifier.clearAndSetSemantics {},
-        )
+        if (usesFullTitle && tile.title.isNotBlank()) {
+            BoxWithConstraints(contentAlignment = Alignment.Center) {
+                // Scale the type to the circle so the whole title fits at any size.
+                val side = minOf(maxWidth, maxHeight)
+                Text(
+                    text = tile.title.trim(),
+                    fontSize = (side.value * 0.16f).sp,
+                    lineHeight = (side.value * 0.19f).sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .padding(side * 0.12f)
+                        .clearAndSetSemantics {},
+                )
+            }
+        } else {
+            Text(
+                text = tile.initial,
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
     }
 }
 

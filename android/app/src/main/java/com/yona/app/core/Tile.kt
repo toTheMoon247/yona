@@ -29,6 +29,9 @@ data class Tile(
     /** First letter of the title for the placeholder logo. */
     val initial: String get() = title.trim().firstOrNull()?.uppercase() ?: "?"
 
+    /** Whether this subscription has a website (URL optional since v0.6.1). */
+    val hasWebsite: Boolean get() = url.isNotBlank()
+
     val hasNotes: Boolean get() = !notes.isNullOrBlank()
 
     /** Cost normalized to a monthly figure (yearly ÷ 12); null if no cost. */

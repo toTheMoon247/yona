@@ -125,11 +125,13 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
-            Text(
-                text = Logos.domain(tile.url) ?: tile.url,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (tile.hasWebsite) {
+                Text(
+                    text = Logos.domain(tile.url) ?: tile.url,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             tile.formattedCost?.let { cost ->
                 Text(
@@ -147,13 +149,15 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
                 )
             }
 
-            Spacer(Modifier.height(4.dp))
+            if (tile.hasWebsite) {
+                Spacer(Modifier.height(4.dp))
 
-            Button(
-                onClick = { openUrl(context, tile.url) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Open Website")
+                Button(
+                    onClick = { openUrl(context, tile.url) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Open Website")
+                }
             }
 
             if (tile.hasNotes) {
