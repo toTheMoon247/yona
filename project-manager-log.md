@@ -92,3 +92,84 @@ A "day" here is one work session, not one calendar day. If a session runs past m
 ## Rest day — 2026-06-16
 
 Day off — no coding today. Picking back up next session with brand logos on Android (Phase A3). _(Not counted as a work day, so the next coding session is Day 6.)_
+
+---
+
+## Day 6 — 2026-06-17
+
+**Today.** Made the Android app look much closer to the finished iPhone one.
+
+- **Real brand logos on Android.** Netflix, Spotify and the like now show their proper logos on the home grid, with a clean colored-letter circle as a fallback when a logo can't be found — just like the iPhone.
+- **Started the visual polish.** Added the touches that make it feel finished: loading placeholders, pull-to-refresh, and smooth little animations. Saved a milestone version.
+
+**Where we are.** Android now has a clean, logo-forward home screen that closely matches the iPhone. It's still missing the iPhone's extra features (costs, renewals, search-to-add, documents).
+
+**Next steps (next day).** Finish the polish, then start adding the iPhone's extra features to Android one by one.
+
+---
+
+## Day 7 — 2026-06-18
+
+**Today.** A big catch-up day — Android gained most of the iPhone's extra features.
+
+- **Finished the polish** (app icon, instant-loading home screen, accessibility pass).
+- **Added the extra features**, each saved as its own version: optional **cost tracking** with a monthly total; **renewal dates** (with monthly/yearly recurrence); **sorting** the home grid (by due date, name, cost…); and **search-to-add** (type a brand name and it fills in the name, website and logo).
+
+**Where we are.** Android is almost at full feature-parity with the iPhone — only document attachments are left.
+
+**Next steps (next day).** Add document attachments to Android, after which the two apps match.
+
+---
+
+## Day 8 — 2026-06-19
+
+**Today.** Brought Android to full parity with the iPhone.
+
+- **Document attachments on Android.** Attach, open and delete files on a subscription, using the same secure cloud storage as the iPhone.
+- **Cleaner tiles** — switched to a long-press menu for Edit/Delete, matching the iPhone.
+
+**Where we are.** The Android and iPhone apps now match feature-for-feature, sharing the same accounts and data. Everything that didn't need Apple's paid developer account is built on both.
+
+**Next steps (next day).** Apple finally approved the developer account — so next is "Sign in with Apple" and getting the iPhone app onto TestFlight (Apple's tester system) so friends can try it.
+
+---
+
+## Day 9 — 2026-06-20
+
+**Today.** Apple's developer account came through, and we shipped a big batch of new features.
+
+- **Sign in with Apple** is now real on the iPhone (it was a placeholder before), and the iPhone app is **on TestFlight** — friends can install and test it.
+- **A paywall plan.** The app is free for up to **4 subscriptions**; beyond that it offers a small upgrade (a low yearly price or a one-time payment). **Real payments aren't switched on yet** — the upgrade screen is in place for now.
+- **A clear "what you pay" summary** on the home screen (your exact yearly total, split into monthly and yearly).
+- **Renamed everything to "subscriptions"** for clarity, and added **"how it's paid"** — where a subscription is billed, plus an optional card type and last 4 digits only (never full card numbers).
+- Saved this as the iPhone's **v0.6** version.
+
+**Where we are.** The iPhone app is on TestFlight with the new features; friends can start testing. Android still needs to catch up on this batch.
+
+**Next steps (next day).** Hand the iPhone build to testers; bring Android up to match the new features.
+
+---
+
+## Day 10 — 2026-06-21
+
+**Today.** Acted on the first real-world feedback, brought Android fully up to date, and polished its look.
+
+- **Your mum tried the app** and immediately hit a wall — she couldn't add her building maintenance fee because the app demanded a website. **Fixed it:** a website is now **optional**, and subscriptions without one show their **full name inside the circle**. Saved as **v0.6.1** and sent a fresh TestFlight build to testers.
+- **Android caught up** with the whole recent batch: optional website + full-name circle, the yearly-spend summary, "how it's paid", and the paywall (free up to 4 subscriptions). Android matches the iPhone again on features.
+- **Polished the Android look** so it feels as refined as the iPhone: a lighter, translucent search bar; modern rounded menus instead of plain gray boxes; and a redesigned add/edit form using the iPhone's grouped "cards" style.
+
+**Where we are.** Both apps are full-featured and now look and feel alike. The iPhone is in friends-and-family testing on TestFlight (including family); Android is ready for its own store testing once the Google account verification finishes. Real payments and phone notifications are intentionally still switched off.
+
+**Next steps.** Save the Android feature version; get Android into Google Play testing; later, switch on real payments (the billing service) and Apple push notifications.
+
+---
+
+## Rest day — 2026-06-22
+
+Day off — no coding today.
+
+---
+
+## Rest day — 2026-06-23 _(Today)_
+
+No coding today — just caught this project log up (Days 6–10) so it reflects the recent work.
