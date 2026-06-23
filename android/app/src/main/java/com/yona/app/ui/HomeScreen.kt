@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -306,16 +307,29 @@ private fun BrandGridIcon() {
 
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+    val shape = RoundedCornerShape(28.dp)
+    // Subtle translucent fill + a hairline border for a lighter, more modern pill.
+    val fill = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     TextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        placeholder = { Text("Search") },
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(shape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f), shape),
+        placeholder = {
+            Text("Search", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        },
         singleLine = true,
-        shape = RoundedCornerShape(28.dp),
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+        shape = shape,
+        leadingIcon = {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
@@ -324,9 +338,9 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
             }
         },
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedContainerColor = fill,
+            unfocusedContainerColor = fill,
+            disabledContainerColor = fill,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
@@ -489,7 +503,14 @@ private fun OverflowMenu(
     IconButton(onClick = { expanded = true }) {
         Icon(Icons.Default.MoreVert, contentDescription = "More")
     }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        shape = RoundedCornerShape(16.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shadowElevation = 8.dp,
+        tonalElevation = 0.dp,
+    ) {
         Text(
             text = "Sort by",
             style = MaterialTheme.typography.labelMedium,

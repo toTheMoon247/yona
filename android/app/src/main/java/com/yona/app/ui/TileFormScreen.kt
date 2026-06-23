@@ -1,40 +1,44 @@
 package com.yona.app.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +49,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
@@ -57,6 +62,7 @@ import com.yona.app.core.TileDraft
 import com.yona.app.core.TileStore
 import com.yona.app.core.UrlHelpers
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -64,9 +70,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Create (existing == null) or edit (existing != null) a tile. Reuses one form
- * for both, mirroring the iOS shared form.
+ * Create (existing == null) or edit (existing != null) a tile. Reuses one form for
+ * both, mirroring the iOS shared form — inset "grouped cards" on a tonal page.
  */
+
 /** Prefill the cost field without a trailing ".0" for whole amounts. */
 private fun formatAmount(amount: Double): String =
     if (amount % 1.0 == 0.0) amount.toLong().toString() else amount.toString()
@@ -82,6 +89,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val editing = existing != null
+    val currencySymbol = remember { NumberFormat.getCurrencyInstance().currency?.symbol ?: "$" }
 
     var title by rememberSaveable { mutableStateOf(existing?.title ?: "") }
     var url by rememberSaveable { mutableStateOf(existing?.url ?: "") }
@@ -142,7 +150,10 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
         }
     }
 
+    val page = MaterialTheme.colorScheme.surfaceContainerLow
+
     Scaffold(
+        containerColor = page,
         topBar = {
             TopAppBar(
                 title = { Text(if (editing) "Edit subscription" else "Add subscription") },
@@ -156,19 +167,20 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                         Text("Save")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = page),
             )
         },
     ) { innerPadding ->
+        val billingSource = BillingSource.fromRaw(billingRaw)
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp),
         ) {
-            Spacer(Modifier.height(4.dp))
-
             if (existing == null) {
                 ServiceSearchField(
                     onSelect = { name, domain ->
@@ -177,153 +189,87 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                     },
                     enabled = !saving,
                 )
-                HorizontalDivider()
             }
 
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") },
-                singleLine = true,
-                enabled = !saving,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            OutlinedTextField(
-                value = url,
-                onValueChange = { url = it },
-                label = { Text("Website (optional)") },
-                placeholder = { Text("netflix.com") },
-                singleLine = true,
-                enabled = !saving,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            OutlinedTextField(
-                value = notes,
-                onValueChange = { notes = it },
-                label = { Text("Notes (optional)") },
-                minLines = 3,
-                enabled = !saving,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            OutlinedTextField(
-                value = costText,
-                onValueChange = { costText = it },
-                label = { Text("Cost (optional)") },
-                singleLine = true,
-                enabled = !saving,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            if (costText.isNotBlank()) {
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    SegmentedButton(
-                        selected = period == CostPeriod.MONTHLY,
-                        onClick = { period = CostPeriod.MONTHLY },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                        enabled = !saving,
-                    ) { Text("Monthly") }
-                    SegmentedButton(
-                        selected = period == CostPeriod.YEARLY,
-                        onClick = { period = CostPeriod.YEARLY },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                        enabled = !saving,
-                    ) { Text("Yearly") }
-                }
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "Renewal date (optional)",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // Identity — Title + Website grouped, like the iOS top card.
+            FormSection {
+                CardTextField(title, { title = it }, "Title", !saving)
+                InsetDivider()
+                CardTextField(
+                    url, { url = it }, "Website (optional)", !saving,
+                    keyboardType = KeyboardType.Uri,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AssistChip(onClick = { pickRenewal(LocalDate.now()) }, label = { Text("Today") })
-                    AssistChip(
-                        onClick = { pickRenewal(LocalDate.now().plusMonths(1)) },
-                        label = { Text("+1 month") },
-                    )
-                    AssistChip(
-                        onClick = { pickRenewal(LocalDate.now().plusYears(1)) },
-                        label = { Text("+1 year") },
-                    )
-                }
+            }
 
-                val currentRenewal = renewalDate
-                if (currentRenewal != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Renews ${displayDate(currentRenewal)}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(onClick = { showDatePicker = true }, enabled = !saving) {
-                            Text("Change")
-                        }
-                        TextButton(
-                            onClick = { renewalDate = null; renewalRepeat = null },
-                            enabled = !saving,
-                        ) { Text("Clear") }
-                    }
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            FormSection(label = "Notes (optional)") {
+                CardTextField(
+                    notes, { notes = it }, "Notes", !saving,
+                    singleLine = false, minLines = 3,
+                )
+            }
+
+            FormSection(label = "Cost (optional)") {
+                CardTextField(
+                    costText, { costText = it }, "0.00", !saving,
+                    keyboardType = KeyboardType.Decimal, prefix = currencySymbol,
+                )
+                if (costText.isNotBlank()) {
+                    InsetDivider()
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                    ) {
                         SegmentedButton(
-                            selected = renewalRepeat == null,
-                            onClick = { renewalRepeat = null },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-                            enabled = !saving,
-                        ) { Text("Never") }
-                        SegmentedButton(
-                            selected = renewalRepeat == RenewalRepeat.MONTHLY,
-                            onClick = { renewalRepeat = RenewalRepeat.MONTHLY },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                            selected = period == CostPeriod.MONTHLY,
+                            onClick = { period = CostPeriod.MONTHLY },
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
                             enabled = !saving,
                         ) { Text("Monthly") }
                         SegmentedButton(
-                            selected = renewalRepeat == RenewalRepeat.YEARLY,
-                            onClick = { renewalRepeat = RenewalRepeat.YEARLY },
-                            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                            selected = period == CostPeriod.YEARLY,
+                            onClick = { period = CostPeriod.YEARLY },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
                             enabled = !saving,
                         ) { Text("Yearly") }
-                    }
-                } else {
-                    TextButton(onClick = { showDatePicker = true }, enabled = !saving) {
-                        Text("Pick a date…")
                     }
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "How it's paid (optional)",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                val billingSource = BillingSource.fromRaw(billingRaw)
-                ExposedDropdownMenuBox(
-                    expanded = billingExpanded,
-                    onExpandedChange = { if (!saving) billingExpanded = it },
-                ) {
-                    OutlinedTextField(
-                        value = billingSource?.label ?: "Not set",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Billed through") },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = billingExpanded)
-                        },
-                        enabled = !saving,
+            FormSection(
+                label = "How it's paid (optional)",
+                footer = if (billingSource?.usesPaymentMethod == true) {
+                    "Card type + last 4 only — never full card numbers."
+                } else {
+                    "Where this subscription is billed, so you know where to cancel or manage it."
+                },
+            ) {
+                Box {
+                    Row(
                         modifier = Modifier
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth(),
-                    )
-                    ExposedDropdownMenu(
+                            .fillMaxWidth()
+                            .clickable(enabled = !saving) { billingExpanded = true }
+                            .padding(horizontal = 16.dp, vertical = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Billed through", modifier = Modifier.weight(1f))
+                        Text(
+                            text = billingSource?.label ?: "Not set",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Icon(
+                            Icons.Default.ArrowDropDown,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    DropdownMenu(
                         expanded = billingExpanded,
                         onDismissRequest = { billingExpanded = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 8.dp,
+                        tonalElevation = 0.dp,
                     ) {
                         DropdownMenuItem(
                             text = { Text("Not set") },
@@ -338,20 +284,72 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                     }
                 }
                 if (billingSource?.usesPaymentMethod == true) {
-                    OutlinedTextField(
-                        value = paymentMethod,
-                        onValueChange = { paymentMethod = it },
-                        label = { Text("Payment method") },
-                        placeholder = { Text("e.g. Visa ••1234") },
-                        singleLine = true,
-                        enabled = !saving,
-                        modifier = Modifier.fillMaxWidth(),
+                    InsetDivider()
+                    CardTextField(
+                        paymentMethod, { paymentMethod = it },
+                        "Payment method — e.g. Visa ••1234", !saving,
                     )
-                    Text(
-                        text = "Card type + last 4 only — never full card numbers.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                }
+            }
+
+            FormSection(label = "Renewal date (optional)") {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AssistChip(onClick = { pickRenewal(LocalDate.now()) }, label = { Text("Today") })
+                        AssistChip(
+                            onClick = { pickRenewal(LocalDate.now().plusMonths(1)) },
+                            label = { Text("+1 month") },
+                        )
+                        AssistChip(
+                            onClick = { pickRenewal(LocalDate.now().plusYears(1)) },
+                            label = { Text("+1 year") },
+                        )
+                    }
+
+                    val currentRenewal = renewalDate
+                    if (currentRenewal != null) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Renews ${displayDate(currentRenewal)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = { showDatePicker = true }, enabled = !saving) {
+                                Text("Change")
+                            }
+                            TextButton(
+                                onClick = { renewalDate = null; renewalRepeat = null },
+                                enabled = !saving,
+                            ) { Text("Clear") }
+                        }
+                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                            SegmentedButton(
+                                selected = renewalRepeat == null,
+                                onClick = { renewalRepeat = null },
+                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                                enabled = !saving,
+                            ) { Text("Never") }
+                            SegmentedButton(
+                                selected = renewalRepeat == RenewalRepeat.MONTHLY,
+                                onClick = { renewalRepeat = RenewalRepeat.MONTHLY },
+                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                                enabled = !saving,
+                            ) { Text("Monthly") }
+                            SegmentedButton(
+                                selected = renewalRepeat == RenewalRepeat.YEARLY,
+                                onClick = { renewalRepeat = RenewalRepeat.YEARLY },
+                                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                                enabled = !saving,
+                            ) { Text("Yearly") }
+                        }
+                    } else {
+                        TextButton(onClick = { showDatePicker = true }, enabled = !saving) {
+                            Text("Pick a date…")
+                        }
+                    }
                 }
             }
 
@@ -360,6 +358,7 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = 8.dp),
                 )
             }
 
@@ -391,4 +390,80 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
             DatePicker(state = dateState)
         }
     }
+}
+
+/** A labelled inset "card" section on the tonal page (iOS inset-grouped look). */
+@Composable
+private fun FormSection(
+    label: String? = null,
+    footer: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Column(content = content)
+        }
+        if (footer != null) {
+            Text(
+                text = footer,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+    }
+}
+
+/** A borderless text field that sits flush inside a [FormSection] card. */
+@Composable
+private fun CardTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    enabled: Boolean,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
+    prefix: String? = null,
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        prefix = prefix?.let { { Text("$it ", color = MaterialTheme.colorScheme.onSurfaceVariant) } },
+        enabled = enabled,
+        singleLine = singleLine,
+        minLines = minLines,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** A hairline divider inset from the left, matching grouped-list rows. */
+@Composable
+private fun InsetDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 16.dp),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+    )
 }

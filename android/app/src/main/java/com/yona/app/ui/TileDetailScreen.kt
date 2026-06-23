@@ -80,7 +80,14 @@ fun TileDetailScreen(tile: Tile, onBack: () -> Unit, onEdit: () -> Unit) {
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "More")
                     }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 8.dp,
+                        tonalElevation = 0.dp,
+                    ) {
                         DropdownMenuItem(
                             text = { Text("Edit") },
                             onClick = {
