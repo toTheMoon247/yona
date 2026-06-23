@@ -7,6 +7,27 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.6.0 — Android: iOS v0.6 parity + polish · 2026-06-23
+
+Brings Android up to the iPhone's v0.6 feature set (mirroring `ios-v0.6.0` / `v0.6.1`),
+plus a visual polish pass.
+
+- **Optional URL** — a subscription no longer needs a website; no-website tiles show
+  the full title fitted in the circle.
+- **How it's paid** — billing source (App Store · Google Play · Direct · Bank · Other)
+  + optional payment method (card type + last 4 only, non-store sources).
+- **Spend-hero header** — "You pay $X a year" with the monthly/yearly split + per-bucket
+  counts, plus the "Yona: Subscription Tracker" brand mark in the top bar.
+- **Paywall + freemium gate** — free up to 4 subscriptions; a 5th opens an upgrade
+  screen (yearly / lifetime placeholders). Real billing not wired yet (debug unlock).
+- **Visual polish** — translucent search pill, rounded shadowed menus, iOS-style
+  grouped "cards" add/edit form, and a fixed **brand-blue** accent (matches the app
+  icon + iOS; Material You dynamic color off).
+
+No new DB (migrations 0004/0005 already applied to the shared Supabase). Apple Sign-In
+has no Android analog (Google sign-in; Apple stubbed). Next: Play Store prep →
+`android-v0.7.0`.
+
 ## ios-v0.6.1 — iOS: Optional URL · 2026-06-21
 
 A subscription no longer requires a website — the first real tester (a building

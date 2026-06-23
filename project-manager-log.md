@@ -170,6 +170,14 @@ Day off — no coding today.
 
 ---
 
-## Rest day — 2026-06-23 _(Today)_
+## Day 11 — 2026-06-23 _(Today)_
 
-No coding today — just caught this project log up (Days 6–10) so it reflects the recent work.
+**Today.** A small but visible colour fix, and Android's feature version is saved.
+
+- **Made Android's blue match the iPhone.** The accent had been following the phone's wallpaper (a greyish blue); switched it to a fixed brand blue that matches the app icon and the iPhone, so it looks the same on every device.
+- **Saved Android's feature version** (the equivalent of the iPhone's v0.6). Android is now fully caught up and polished, matching the iPhone.
+- Also caught this project log up to date.
+
+**Where we are.** Both apps are full-featured, look alike, and share the same data. The iPhone is in friends-and-family testing on TestFlight; Android is ready for its own store testing once the Google account verification finishes. Payments and phone notifications are still intentionally switched off.
+
+**Next steps.** Get Android into Google Play internal testing; later, switch on real payments (the billing service) and Apple push notifications.
