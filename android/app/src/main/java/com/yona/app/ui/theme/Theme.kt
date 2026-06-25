@@ -1,7 +1,6 @@
 package com.yona.app.ui.theme
 
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -42,7 +41,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun YonaTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Always light — Yona ships a single light look on both platforms; we don't follow
+    // the phone's dark mode (the dark palette here is unused unless explicitly requested).
+    darkTheme: Boolean = false,
     // Default OFF so the brand blue stays consistent (matching iOS), rather than
     // following the device wallpaper (Material You). Opt in only if ever desired.
     dynamicColor: Boolean = false,

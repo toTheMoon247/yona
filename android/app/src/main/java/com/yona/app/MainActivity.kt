@@ -1,8 +1,10 @@
 package com.yona.app
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +22,12 @@ class MainActivity : ComponentActivity() {
         // Completes an OAuth sign-in if the app was (re)launched via yona://auth-callback.
         Supabase.client.handleDeeplinks(intent)
 
-        enableEdgeToEdge()
+        // Force light system bars (dark icons on a transparent scrim) so the status/nav
+        // bar icons stay visible on Yona's white UI even when the phone is in dark mode.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+        )
         setContent {
             YonaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
