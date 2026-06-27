@@ -15,6 +15,7 @@ struct HomeView: View {
     @Environment(EntitlementStore.self) private var entitlement
 
     @AppStorage("tileSort") private var sortOption: TileSort = .recentlyAdded
+    @AppStorage("spendShowsMonthly") private var spendShowsMonthly = false
     @State private var searchText = ""
     @State private var showingCreate = false
     @State private var showingPaywall = false
@@ -177,44 +178,39 @@ struct HomeView: View {
         }
     }
 
-    /// Spend hero: the exact total per year (monthly × 12 + yearly), with the exact
-    /// monthly/yearly billing split and a subscription count per bucket. Computed over
-    /// all subscriptions so it's stable while searching.
+    /// Spend hero: the exact total across all subscriptions, shown per year (monthly × 12
+    /// + yearly) or per month (that annual figure ÷ 12), toggled and remembered. Computed
+    /// over all subscriptions so it's stable while searching.
     private var spendHeader: some View {
         let items = tileStore.tiles.value ?? []
         let code = Tile.currencyCode
 
-        let monthlySubs = items.filter { $0.costPeriod == .monthly && $0.costAmount != nil }
-        let yearlySubs = items.filter { $0.costPeriod == .yearly && $0.costAmount != nil }
-        let monthlyTotal = monthlySubs.compactMap(\.costAmount).reduce(0, +)
-        let yearlyTotal = yearlySubs.compactMap(\.costAmount).reduce(0, +)
+        let monthlyTotal = items.filter { $0.costPeriod == .monthly }.compactMap(\.costAmount).reduce(0, +)
+        let yearlyTotal = items.filter { $0.costPeriod == .yearly }.compactMap(\.costAmount).reduce(0, +)
         let annualTotal = monthlyTotal * 12 + yearlyTotal
+        let displayTotal = spendShowsMonthly ? annualTotal / 12 : annualTotal
+        let unit = spendShowsMonthly ? " a month" : " a year"
 
-        var parts: [String] = []
-        if monthlyTotal > 0 {
-            parts.append("\(monthlyTotal.formatted(.currency(code: code)))/mo · \(subCount(monthlySubs.count))")
-        }
-        if yearlyTotal > 0 {
-            parts.append("\(yearlyTotal.formatted(.currency(code: code)))/yr · \(subCount(yearlySubs.count))")
-        }
-
-        return VStack(alignment: .leading, spacing: 2) {
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
             if annualTotal > 0 {
                 Text("You pay")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 (
-                    Text(annualTotal.formatted(.currency(code: code)))
+                    Text(displayTotal.formatted(.currency(code: code)))
                         .font(.largeTitle.bold())
-                    + Text(" a year")
+                    + Text(unit)
                         .font(.title3)
                         .foregroundStyle(.secondary)
                 )
                 .contentTransition(.numericText())
-                Text(parts.joined(separator: "   ·   "))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 2)
+                Picker("Show spending per", selection: $spendShowsMonthly) {
+                    Text("Monthly").tag(true)
+                    Text("Yearly").tag(false)
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
+                .padding(.top, DesignTokens.Spacing.xs)
             } else {
                 Text("\(items.count) subscription\(items.count == 1 ? "" : "s")")
                     .font(.largeTitle.bold())
@@ -224,9 +220,8 @@ struct HomeView: View {
         .padding(.horizontal, DesignTokens.Spacing.l)
         .padding(.top, DesignTokens.Spacing.s)
         .padding(.bottom, DesignTokens.Spacing.xs)
+        .animation(.snappy, value: spendShowsMonthly)
     }
-
-    private func subCount(_ count: Int) -> String { "\(count) sub\(count == 1 ? "" : "s")" }
 
     private var emptyState: some View {
         ContentUnavailableView {
