@@ -7,6 +7,25 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## ios-v0.6.2 — iOS: Spending tools + flexible cadences · 2026-06-27
+
+Mostly from mum's feedback. Build 5.
+
+- **Spend total: Monthly/Yearly toggle** — flip the Home hero between "You pay £X a
+  year" and "£Y a month" (remembered).
+- **Flexible billing cadences** — Weekly · Monthly · Every 2 months · Quarterly ·
+  Every 6 months · Yearly (her house-council bill is every 2 months), plus the
+  matching "renews every…" recurrence. Spend totals annualize any cadence.
+- **Chips instead of dropdowns** — Billing + Billed-through are now wrapping chips so
+  every choice stays visible.
+- **Cost breakdown screen** (roadmap #8) — tap the total → every subscription sorted
+  high → low, with its real billing, normalized amount, and % share.
+- **Paywall mock unlock works in TestFlight** too (still off in App Store production)
+  so testers can go past the 4-subscription free limit.
+
+Migration `0006` relaxes the cost_period / renewal_repeat checks. Android mirror of
+the spending tools + cadences is pending.
+
 ## android-v0.6.0 — Android: iOS v0.6 parity + polish · 2026-06-23
 
 Brings Android up to the iPhone's v0.6 feature set (mirroring `ios-v0.6.0` / `v0.6.1`),
