@@ -24,10 +24,28 @@ final class EntitlementStore {
         isPremium || currentCount < freeTileLimit
     }
 
-    #if DEBUG
-    /// Dev-only: simulate a purchase until RevenueCat is connected.
+    /// Grants Premium without a real purchase — the mock unlock used in Debug and
+    /// TestFlight (see `AppBuild.usesMockPurchases`). Real purchases (RevenueCat)
+    /// replace this in App Store production builds.
     func setDevPremium(_ value: Bool) {
         isPremium = value
     }
-    #endif
+}
+
+/// Which build we're running in, for gating the mock paywall.
+enum AppBuild {
+    /// True where the paywall should mock-unlock instead of charging: Debug (Xcode)
+    /// and TestFlight (its receipt is named `sandboxReceipt`). False in App Store
+    /// production, so the real purchase path runs there.
+    static var usesMockPurchases: Bool {
+        #if DEBUG
+        return true
+        #else
+        // TestFlight's receipt is named "sandboxReceipt" (App Store's is "receipt").
+        // Read via KVC to sidestep the iOS 18 deprecation of `appStoreReceiptURL` —
+        // this is a temporary mock gate, removed when RevenueCat lands.
+        let receiptURL = Bundle.main.value(forKey: "appStoreReceiptURL") as? URL
+        return receiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
 }

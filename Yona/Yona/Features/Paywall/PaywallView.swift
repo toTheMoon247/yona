@@ -121,12 +121,13 @@ struct PaywallView: View {
     }
 
     private func purchase() {
-        #if DEBUG
-        // Dev-unlock until RevenueCat is connected.
-        entitlement.setDevPremium(true)
-        dismiss()
-        #else
-        // TODO: real purchase via RevenueCat (selectedPlan).
-        #endif
+        if AppBuild.usesMockPurchases {
+            // Mock unlock in Debug + TestFlight so testers can go past the free limit.
+            // App Store production falls through to the real purchase path below.
+            entitlement.setDevPremium(true)
+            dismiss()
+        } else {
+            // TODO: real purchase via RevenueCat (selectedPlan).
+        }
     }
 }
