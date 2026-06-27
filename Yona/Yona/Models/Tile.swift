@@ -7,14 +7,83 @@
 
 import Foundation
 
+/// How often a subscription is billed. Stored as a snake_case string in Postgres.
 enum CostPeriod: String, Codable, CaseIterable, Hashable {
+    case weekly
     case monthly
+    case everyTwoMonths = "every_two_months"
+    case quarterly
+    case everySixMonths = "every_six_months"
     case yearly
+
+    /// How many times a year this period bills — used to annualize a cost.
+    var timesPerYear: Double {
+        switch self {
+        case .weekly: return 52
+        case .monthly: return 12
+        case .everyTwoMonths: return 6
+        case .quarterly: return 4
+        case .everySixMonths: return 2
+        case .yearly: return 1
+        }
+    }
+
+    /// Picker label, e.g. "Every 2 months".
+    var label: String {
+        switch self {
+        case .weekly: return "Weekly"
+        case .monthly: return "Monthly"
+        case .everyTwoMonths: return "Every 2 months"
+        case .quarterly: return "Quarterly"
+        case .everySixMonths: return "Every 6 months"
+        case .yearly: return "Yearly"
+        }
+    }
+
+    /// Suffix for a cost line, e.g. "/ month", "/ 2 months".
+    var costSuffix: String {
+        switch self {
+        case .weekly: return "/ week"
+        case .monthly: return "/ month"
+        case .everyTwoMonths: return "/ 2 months"
+        case .quarterly: return "/ quarter"
+        case .everySixMonths: return "/ 6 months"
+        case .yearly: return "/ year"
+        }
+    }
 }
 
+/// How often a renewal/due date recurs — parallels `CostPeriod` (same raw values).
 enum RenewalRepeat: String, Codable, CaseIterable, Hashable {
+    case weekly
     case monthly
+    case everyTwoMonths = "every_two_months"
+    case quarterly
+    case everySixMonths = "every_six_months"
     case yearly
+
+    var label: String {
+        switch self {
+        case .weekly: return "Weekly"
+        case .monthly: return "Monthly"
+        case .everyTwoMonths: return "Every 2 months"
+        case .quarterly: return "Quarterly"
+        case .everySixMonths: return "Every 6 months"
+        case .yearly: return "Yearly"
+        }
+    }
+
+    /// The calendar step to roll a recurring date forward.
+    var step: (component: Calendar.Component, value: Int) {
+        switch self {
+        case .weekly: return (.day, 7)
+        case .monthly: return (.month, 1)
+        case .everyTwoMonths: return (.month, 2)
+        case .quarterly: return (.month, 3)
+        case .everySixMonths: return (.month, 6)
+        case .yearly: return (.year, 1)
+        }
+    }
 }
 
 /// Where a subscription is billed — the most useful "how it's paid" fact, since it
@@ -116,17 +185,23 @@ struct Tile: Identifiable, Codable, Hashable {
         return !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    /// Cost normalized to a monthly figure (yearly ÷ 12) for summaries; nil if no cost.
-    var monthlyCost: Double? {
+    /// Cost annualized (amount × times-per-year) for spend totals; nil if no cost.
+    var annualizedCost: Double? {
         guard let costAmount, let costPeriod else { return nil }
-        return costPeriod == .yearly ? costAmount / 12 : costAmount
+        return costAmount * costPeriod.timesPerYear
     }
 
-    /// Display string like "$15.00 / month", or nil if no cost set.
+    /// Cost normalized to a monthly figure for summaries/sorting; nil if no cost.
+    var monthlyCost: Double? {
+        guard let annualizedCost else { return nil }
+        return annualizedCost / 12
+    }
+
+    /// Display string like "$15.00 / month" or "$60.00 / 2 months"; nil if no cost set.
     var formattedCost: String? {
         guard let costAmount, let costPeriod else { return nil }
         let amount = costAmount.formatted(.currency(code: Self.currencyCode))
-        return "\(amount) / \(costPeriod == .monthly ? "month" : "year")"
+        return "\(amount) \(costPeriod.costSuffix)"
     }
 
     /// The next upcoming renewal: a repeating anchor rolled forward to today or
@@ -137,9 +212,9 @@ struct Tile: Identifiable, Codable, Hashable {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         var date = calendar.startOfDay(for: renewalDate)
-        let component: Calendar.Component = renewalRepeat == .monthly ? .month : .year
+        let step = renewalRepeat.step
         while date < today {
-            guard let next = calendar.date(byAdding: component, value: 1, to: date) else { break }
+            guard let next = calendar.date(byAdding: step.component, value: step.value, to: date) else { break }
             date = next
         }
         return date

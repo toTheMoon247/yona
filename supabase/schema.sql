@@ -20,9 +20,9 @@ create table if not exists public.tiles (
   logo_url    text,                                   -- resolved once at create/edit
   notes       text,                                   -- Option A: single optional text field
   cost_amount numeric(12,2),                          -- optional cost tracking
-  cost_period text check (cost_period in ('monthly', 'yearly')),
+  cost_period text check (cost_period in ('weekly', 'monthly', 'every_two_months', 'quarterly', 'every_six_months', 'yearly')),
   renewal_date date,                                  -- optional renewal/due date
-  renewal_repeat text check (renewal_repeat in ('monthly', 'yearly')), -- null = one-time
+  renewal_repeat text check (renewal_repeat in ('weekly', 'monthly', 'every_two_months', 'quarterly', 'every_six_months', 'yearly')), -- null = one-time
   billing_source text check (billing_source in ('app_store', 'google_play', 'direct', 'bank', 'other')), -- where it's billed
   payment_method text,                                 -- optional, card type + last 4 only (e.g. "Visa ••1234")
   created_at  timestamptz not null default now(),

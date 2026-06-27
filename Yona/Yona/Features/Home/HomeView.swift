@@ -185,9 +185,7 @@ struct HomeView: View {
         let items = tileStore.tiles.value ?? []
         let code = Tile.currencyCode
 
-        let monthlyTotal = items.filter { $0.costPeriod == .monthly }.compactMap(\.costAmount).reduce(0, +)
-        let yearlyTotal = items.filter { $0.costPeriod == .yearly }.compactMap(\.costAmount).reduce(0, +)
-        let annualTotal = monthlyTotal * 12 + yearlyTotal
+        let annualTotal = items.compactMap(\.annualizedCost).reduce(0, +)
         let displayTotal = spendShowsMonthly ? annualTotal / 12 : annualTotal
         let unit = spendShowsMonthly ? " a month" : " a year"
 

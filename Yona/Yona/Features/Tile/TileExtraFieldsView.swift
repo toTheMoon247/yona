@@ -30,11 +30,13 @@ struct TileExtraFieldsView: View {
                 TextField("Amount", text: $costText)
                     .keyboardType(.decimalPad)
             }
-            Picker("Billing", selection: $costPeriod) {
-                Text("Monthly").tag(CostPeriod.monthly)
-                Text("Yearly").tag(CostPeriod.yearly)
+            ChipFlow(spacing: 8) {
+                ForEach(CostPeriod.allCases, id: \.self) { period in
+                    SelectableChip(text: period.label, isSelected: costPeriod == period) {
+                        costPeriod = period
+                    }
+                }
             }
-            .pickerStyle(.segmented)
         }
         billingSection
         renewalSection
@@ -44,12 +46,22 @@ struct TileExtraFieldsView: View {
     /// only applies to non-store sources. We store a card type + last 4 only.
     private var billingSection: some View {
         Section {
-            Picker("Billed through", selection: $billingSource) {
-                Text("Not set").tag(BillingSource?.none)
-                ForEach(BillingSource.allCases) { source in
-                    Text(source.label).tag(BillingSource?.some(source))
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Billed through")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                ChipFlow(spacing: 8) {
+                    SelectableChip(text: "Not set", isSelected: billingSource == nil) {
+                        billingSource = nil
+                    }
+                    ForEach(BillingSource.allCases) { source in
+                        SelectableChip(text: source.label, isSelected: billingSource == source) {
+                            billingSource = source
+                        }
+                    }
                 }
             }
+            .padding(.vertical, 2)
             if billingSource?.usesPaymentMethod ?? false {
                 TextField("Payment method (e.g. Visa ••1234)", text: $paymentMethod)
                     .textInputAutocapitalization(.words)
@@ -85,8 +97,9 @@ struct TileExtraFieldsView: View {
 
                 Picker("Repeats", selection: $renewalRepeat) {
                     Text("Never").tag(RenewalRepeat?.none)
-                    Text("Monthly").tag(RenewalRepeat?.some(.monthly))
-                    Text("Yearly").tag(RenewalRepeat?.some(.yearly))
+                    ForEach(RenewalRepeat.allCases, id: \.self) { option in
+                        Text(option.label).tag(RenewalRepeat?.some(option))
+                    }
                 }
             }
         }
@@ -101,10 +114,79 @@ struct TileExtraFieldsView: View {
         Haptics.tap()
     }
 
-    /// When the renewal date is switched on and a cost is set, default "Repeats" to match it.
+    /// When the renewal date is switched on and a cost is set, default "Repeats" to match
+    /// the billing cadence (the two enums share raw values).
     private func applyRepeatDefault(isOn: Bool) {
         guard isOn, renewalRepeat == nil,
               !costText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        renewalRepeat = costPeriod == .monthly ? .monthly : .yearly
+        renewalRepeat = RenewalRepeat(rawValue: costPeriod.rawValue)
+    }
+}
+
+/// A single-select "chip" — a tappable pill that fills with the accent when selected.
+/// Used in place of a dropdown so every choice stays visible.
+struct SelectableChip: View {
+    let text: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(text)
+                .font(.subheadline)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule().fill(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                )
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
+                .overlay(
+                    Capsule().strokeBorder(isSelected ? Color.clear : Color(.separator), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// A simple wrapping layout: lays children left-to-right, wrapping to the next line
+/// when the row is full. Lets a row of chips flow onto multiple lines.
+struct ChipFlow: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var widest: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > 0, x + size.width > maxWidth {
+                x = 0
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+            widest = max(widest, x - spacing)
+        }
+        return CGSize(width: maxWidth == .infinity ? widest : maxWidth, height: y + rowHeight)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        var x = bounds.minX
+        var y = bounds.minY
+        var rowHeight: CGFloat = 0
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x > bounds.minX, x + size.width > bounds.maxX {
+                x = bounds.minX
+                y += rowHeight + spacing
+                rowHeight = 0
+            }
+            subview.place(at: CGPoint(x: x, y: y), anchor: .topLeading, proposal: ProposedViewSize(size))
+            x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
     }
 }
