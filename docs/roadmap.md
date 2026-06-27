@@ -196,6 +196,37 @@ entitlements (so it reflects an actual paid state, not just the dev toggle).
 
 ---
 
+## 14. Local brand directory (Hebrew name → domain)  _(idea — planned)_
+
+**Problem:** logos are fetched by *domain*, but people search by *name* — often a
+local, Hebrew-named service (an Israeli insurer, gym, building council). Brandfetch's
+brand search is global/English-leaning, so Hebrew-name searches for local brands
+return nothing → manual entry → a name-in-circle tile with no logo. There is **no
+Israeli equivalent of Brandfetch** (the logo APIs — Brandfetch, Logo.dev, API Ninjas —
+are all global and index mostly well-known companies), so switching vendors wouldn't
+help. The real bottleneck is **Hebrew name → domain**; once we have the domain (e.g.
+`harel.co.il`) the existing logo pipeline (Brandfetch logo-by-domain + favicon) already
+works on `.co.il` sites.
+
+**Idea:** a small **curated brand directory** mapping aliases (Hebrew + English + short
+forms) → domain. Search it *before* falling back to Brandfetch's global search; on a
+match, fill the website + logo from the existing pipeline. A few dozen entries (banks,
+insurers, telecom, utilities, streaming, gyms, supermarkets) cover the large majority of
+real Israeli subscriptions.
+
+- **Store in Supabase** (a `brands` table: aliases[], domain, display name), not bundled
+  in the app — so brands can be added **without an app release**, shared by iOS + Android,
+  cached locally.
+- **Matching:** normalize (strip nikud / whitespace / `בע״מ`), match aliases by
+  substring/prefix. Each brand gets a few aliases.
+- **Seed ~50–100 top Israeli brands** once; grow over time.
+- **Limit (accepted):** the genuine long tail — a tiny niche insurer, or a building
+  council with no website/logo at all — still won't be covered and stays a name-in-circle
+  tile. Custom-logo upload was considered as the catch-all but **deliberately skipped**
+  (the directory solves most cases far more cheaply).
+
+---
+
 ## Already tracked elsewhere (Future / Pro)
 
 From the original spec, beyond the above: **Family Vault** (share tiles with
