@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var searchText = ""
     @State private var showingCreate = false
     @State private var showingPaywall = false
+    @State private var showingBreakdown = false
     @State private var editingTile: Tile?
     @State private var pendingDelete: Tile?
 
@@ -33,6 +34,9 @@ struct HomeView: View {
                 .overlay(alignment: .bottomTrailing) { createButton }
                 .navigationDestination(for: Tile.self) { tile in
                     TileDetailView(tileID: tile.id)
+                }
+                .navigationDestination(isPresented: $showingBreakdown) {
+                    CostBreakdownView()
                 }
                 .navigationTitle("")
                 .navigationBarTitleDisplayMode(.inline)
@@ -178,49 +182,6 @@ struct HomeView: View {
         }
     }
 
-    /// Spend hero: the exact total across all subscriptions, shown per year (monthly × 12
-    /// + yearly) or per month (that annual figure ÷ 12), toggled and remembered. Computed
-    /// over all subscriptions so it's stable while searching.
-    private var spendHeader: some View {
-        let items = tileStore.tiles.value ?? []
-        let code = Tile.currencyCode
-
-        let annualTotal = items.compactMap(\.annualizedCost).reduce(0, +)
-        let displayTotal = spendShowsMonthly ? annualTotal / 12 : annualTotal
-        let unit = spendShowsMonthly ? " a month" : " a year"
-
-        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-            if annualTotal > 0 {
-                Text("You pay")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                (
-                    Text(displayTotal.formatted(.currency(code: code)))
-                        .font(.largeTitle.bold())
-                    + Text(unit)
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                )
-                .contentTransition(.numericText())
-                Picker("Show spending per", selection: $spendShowsMonthly) {
-                    Text("Monthly").tag(true)
-                    Text("Yearly").tag(false)
-                }
-                .pickerStyle(.segmented)
-                .fixedSize()
-                .padding(.top, DesignTokens.Spacing.xs)
-            } else {
-                Text("\(items.count) subscription\(items.count == 1 ? "" : "s")")
-                    .font(.largeTitle.bold())
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, DesignTokens.Spacing.l)
-        .padding(.top, DesignTokens.Spacing.s)
-        .padding(.bottom, DesignTokens.Spacing.xs)
-        .animation(.snappy, value: spendShowsMonthly)
-    }
-
     private var emptyState: some View {
         ContentUnavailableView {
             Label("No subscriptions yet", systemImage: "square.grid.2x2")
@@ -267,5 +228,63 @@ struct HomeView: View {
             get: { pendingDelete != nil },
             set: { if !$0 { pendingDelete = nil } }
         )
+    }
+}
+
+private extension HomeView {
+    /// Spend hero: the exact total across all subscriptions, shown per year or per month
+    /// (that annual figure ÷ 12), toggled and remembered. The headline taps through to the
+    /// cost breakdown. Computed over all subscriptions so it's stable while searching.
+    var spendHeader: some View {
+        let items = tileStore.tiles.value ?? []
+        let code = Tile.currencyCode
+
+        let annualTotal = items.compactMap(\.annualizedCost).reduce(0, +)
+        let displayTotal = spendShowsMonthly ? annualTotal / 12 : annualTotal
+        let unit = spendShowsMonthly ? " a month" : " a year"
+
+        return VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+            if annualTotal > 0 {
+                Button {
+                    showingBreakdown = true
+                } label: {
+                    HStack(alignment: .firstTextBaseline) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("You pay")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            (
+                                Text(displayTotal.formatted(.currency(code: code)))
+                                    .font(.largeTitle.bold())
+                                + Text(unit)
+                                    .font(.title3)
+                                    .foregroundStyle(.secondary)
+                            )
+                            .contentTransition(.numericText())
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+                Picker("Show spending per", selection: $spendShowsMonthly) {
+                    Text("Monthly").tag(true)
+                    Text("Yearly").tag(false)
+                }
+                .pickerStyle(.segmented)
+                .fixedSize()
+                .padding(.top, DesignTokens.Spacing.xs)
+            } else {
+                Text("\(items.count) subscription\(items.count == 1 ? "" : "s")")
+                    .font(.largeTitle.bold())
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, DesignTokens.Spacing.l)
+        .padding(.top, DesignTokens.Spacing.s)
+        .padding(.bottom, DesignTokens.Spacing.xs)
+        .animation(.snappy, value: spendShowsMonthly)
     }
 }
