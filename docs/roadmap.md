@@ -232,3 +232,19 @@ real Israeli subscriptions.
 From the original spec, beyond the above: **Family Vault** (share tiles with
 family), **Reminders** (renewals, expirations), **Emergency Access** (trusted
 family access). See DESIGN §11.
+
+---
+
+## Considered & declined
+
+**Auto-fetch subscription data** _(declined 2026-06-28)._ Asked: instead of typing a
+subscription in, let the user hand Yona their service login (e.g. Netflix) and have it
+pull the details. **Storing third-party credentials is a hard no** — it violates those
+services' ToS, makes Yona hold users' passwords to *other* sites (a breach/liability
+disaster), is technically fragile (scraping, 2FA, CAPTCHAs), and there's no API anyway.
+The *legitimate* version — auto-detect subscriptions from **bank/card transactions** (a
+Plaid-style aggregator) or **billing emails** — was also **declined**: Israeli bank
+coverage is poor (so it wouldn't even work for our primary user), it carries per-account
+recurring cost and heavy privacy/trust weight, and it's a large build — while manual
+entry is already fast (search-to-add, cadences, chips). Revisit only if Israeli
+open-banking coverage and the trust/cost trade-offs change materially.
