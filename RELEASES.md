@@ -7,6 +7,21 @@ project's rollback points. `v1.0.0` is reserved for App Store launch. Newest fir
 Tags are platform-prefixed going forward — `android-v*` for Android, `ios-v*` for
 iOS. The legacy unprefixed `v0.x.0` tags below are the iOS app.
 
+## android-v0.6.1 — Android: Spending tools (mirror ios-v0.6.2) · 2026-06-28
+
+Brings Android level with the iOS spending batch (from mum's feedback):
+
+- **Spend total Monthly/Yearly toggle** (remembered); dropped the per-period buckets.
+- **Flexible billing cadences** — Weekly · Monthly · Every 2 months · Quarterly ·
+  Every 6 months · Yearly + matching renewal recurrence; totals annualize any cadence.
+- **Chips** replace the segmented/dropdown controls (billing period, billed-through,
+  renewal repeat) — native FilterChip + FlowRow, RTL-aware chevron.
+- **Cost breakdown screen** — tap the total → subscriptions sorted high → low with
+  real billing, normalized amount, and % share; rows open the detail.
+
+Migration `0006` already applied (shared Supabase). No new DB. iOS + Android are
+level again.
+
 ## ios-v0.6.2 — iOS: Spending tools + flexible cadences · 2026-06-27
 
 Mostly from mum's feedback. Build 5.

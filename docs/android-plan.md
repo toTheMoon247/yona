@@ -73,6 +73,11 @@ translucent search pill, modern rounded menus, iOS-style grouped-card add/edit f
 and a fixed brand-blue accent matching the app icon + iOS (dynamic color off). Apple
 Sign-In has no Android analog (Google sign-in; Apple stubbed).
 
+## Phase A9.1 — Spending tools  _(✅ → `android-v0.6.1`)_
+Mirror iOS `ios-v0.6.2`: spend-total Monthly/Yearly toggle, flexible billing cadences
+(weekly … every 2 months … yearly) + matching renewal recurrence, chips replacing the
+segmented/dropdown controls, and a cost breakdown screen (roadmap #8).
+
 ## Phase A10 — Play Store prep  _(→ `android-v0.7.0`)_
 Signed release build, Play Console setup, internal testing track (the Android analog
 of iOS's TestFlight). `v1.0.0` reserved for the public store launch.
