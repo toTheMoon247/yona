@@ -20,6 +20,7 @@ import com.yona.app.core.TileStore
 fun SignedInApp(modifier: Modifier = Modifier) {
     var showAdd by remember { mutableStateOf(false) }
     var showPaywall by remember { mutableStateOf(false) }
+    var showBreakdown by remember { mutableStateOf(false) }
     var detailTile by remember { mutableStateOf<Tile?>(null) }
     var editTile by remember { mutableStateOf<Tile?>(null) }
 
@@ -55,9 +56,14 @@ fun SignedInApp(modifier: Modifier = Modifier) {
             onBack = { detailTile = null },
             onEdit = { editTile = tile },
         )
+        showBreakdown -> CostBreakdownScreen(
+            onBack = { showBreakdown = false },
+            onTileClick = { detailTile = it },
+        )
         else -> HomeScreen(
             onAddClick = { requestAdd() },
             onUpgrade = { showPaywall = true },
+            onShowBreakdown = { showBreakdown = true },
             onTileClick = { detailTile = it },
             onEditTile = { editTile = it },
             modifier = modifier,

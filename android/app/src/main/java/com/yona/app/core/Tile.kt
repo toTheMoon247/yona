@@ -36,18 +36,21 @@ data class Tile(
 
     val hasNotes: Boolean get() = !notes.isNullOrBlank()
 
-    /** Cost normalized to a monthly figure (yearly ÷ 12); null if no cost. */
-    val monthlyCost: Double? get() {
+    /** Cost annualized (amount × times-per-year) for spend totals; null if no cost. */
+    val annualizedCost: Double? get() {
         val amount = costAmount ?: return null
-        return if (costPeriod == CostPeriod.YEARLY) amount / 12.0 else amount
+        val period = costPeriod ?: return null
+        return amount * CostPeriod.timesPerYear(period)
     }
 
-    /** Display string like "$15.00 / month", or null if no cost set. */
+    /** Cost normalized to a monthly figure for summaries/sorting; null if no cost. */
+    val monthlyCost: Double? get() = annualizedCost?.let { it / 12.0 }
+
+    /** Display string like "$15.00 / month" or "$60.00 / 2 months"; null if no cost set. */
     val formattedCost: String? get() {
         val amount = costAmount ?: return null
         val period = costPeriod ?: return null
-        val unit = if (period == CostPeriod.YEARLY) "year" else "month"
-        return "${formatCurrency(amount)} / $unit"
+        return "${formatCurrency(amount)} ${CostPeriod.costSuffix(period)}"
     }
 
     private val anchorDate: LocalDate? get() =
@@ -56,11 +59,18 @@ data class Tile(
     /** The next upcoming renewal: a repeating anchor rolled forward to today or later. */
     val nextRenewal: LocalDate? get() {
         var date = anchorDate ?: return null
+        val repeat = renewalRepeat ?: return date
         val today = LocalDate.now()
-        when (renewalRepeat) {
-            RenewalRepeat.MONTHLY -> while (date.isBefore(today)) date = date.plusMonths(1)
-            RenewalRepeat.YEARLY -> while (date.isBefore(today)) date = date.plusYears(1)
-            else -> return date
+        while (date.isBefore(today)) {
+            date = when (repeat) {
+                RenewalRepeat.WEEKLY -> date.plusDays(7)
+                RenewalRepeat.MONTHLY -> date.plusMonths(1)
+                RenewalRepeat.EVERY_TWO_MONTHS -> date.plusMonths(2)
+                RenewalRepeat.QUARTERLY -> date.plusMonths(3)
+                RenewalRepeat.EVERY_SIX_MONTHS -> date.plusMonths(6)
+                RenewalRepeat.YEARLY -> date.plusYears(1)
+                else -> return date
+            }
         }
         return date
     }
@@ -93,13 +103,65 @@ data class Tile(
 }
 
 object CostPeriod {
+    const val WEEKLY = "weekly"
     const val MONTHLY = "monthly"
+    const val EVERY_TWO_MONTHS = "every_two_months"
+    const val QUARTERLY = "quarterly"
+    const val EVERY_SIX_MONTHS = "every_six_months"
     const val YEARLY = "yearly"
+
+    /** In picker order. */
+    val all = listOf(WEEKLY, MONTHLY, EVERY_TWO_MONTHS, QUARTERLY, EVERY_SIX_MONTHS, YEARLY)
+
+    fun timesPerYear(period: String?): Double = when (period) {
+        WEEKLY -> 52.0
+        EVERY_TWO_MONTHS -> 6.0
+        QUARTERLY -> 4.0
+        EVERY_SIX_MONTHS -> 2.0
+        YEARLY -> 1.0
+        else -> 12.0 // monthly / unknown
+    }
+
+    fun label(period: String): String = when (period) {
+        WEEKLY -> "Weekly"
+        MONTHLY -> "Monthly"
+        EVERY_TWO_MONTHS -> "Every 2 months"
+        QUARTERLY -> "Quarterly"
+        EVERY_SIX_MONTHS -> "Every 6 months"
+        YEARLY -> "Yearly"
+        else -> period
+    }
+
+    fun costSuffix(period: String): String = when (period) {
+        WEEKLY -> "/ week"
+        MONTHLY -> "/ month"
+        EVERY_TWO_MONTHS -> "/ 2 months"
+        QUARTERLY -> "/ quarter"
+        EVERY_SIX_MONTHS -> "/ 6 months"
+        YEARLY -> "/ year"
+        else -> ""
+    }
 }
 
 object RenewalRepeat {
+    const val WEEKLY = "weekly"
     const val MONTHLY = "monthly"
+    const val EVERY_TWO_MONTHS = "every_two_months"
+    const val QUARTERLY = "quarterly"
+    const val EVERY_SIX_MONTHS = "every_six_months"
     const val YEARLY = "yearly"
+
+    val all = listOf(WEEKLY, MONTHLY, EVERY_TWO_MONTHS, QUARTERLY, EVERY_SIX_MONTHS, YEARLY)
+
+    fun label(period: String): String = when (period) {
+        WEEKLY -> "Weekly"
+        MONTHLY -> "Monthly"
+        EVERY_TWO_MONTHS -> "Every 2 months"
+        QUARTERLY -> "Quarterly"
+        EVERY_SIX_MONTHS -> "Every 6 months"
+        YEARLY -> "Yearly"
+        else -> period
+    }
 }
 
 /**

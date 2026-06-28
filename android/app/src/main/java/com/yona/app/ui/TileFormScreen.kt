@@ -1,11 +1,12 @@
 package com.yona.app.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,23 +16,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -83,7 +79,7 @@ private val formDateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Local
 private fun displayDate(iso: String): String =
     runCatching { LocalDate.parse(iso).format(formDateFormatter) }.getOrDefault(iso)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -100,7 +96,6 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
     var renewalRepeat by rememberSaveable { mutableStateOf(existing?.renewalRepeat) }
     var billingRaw by rememberSaveable { mutableStateOf(existing?.billingSource) }
     var paymentMethod by rememberSaveable { mutableStateOf(existing?.paymentMethod ?: "") }
-    var billingExpanded by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -215,23 +210,20 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                 )
                 if (costText.isNotBlank()) {
                     InsetDivider()
-                    SingleChoiceSegmentedButtonRow(
+                    FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        SegmentedButton(
-                            selected = period == CostPeriod.MONTHLY,
-                            onClick = { period = CostPeriod.MONTHLY },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                            enabled = !saving,
-                        ) { Text("Monthly") }
-                        SegmentedButton(
-                            selected = period == CostPeriod.YEARLY,
-                            onClick = { period = CostPeriod.YEARLY },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                            enabled = !saving,
-                        ) { Text("Yearly") }
+                        CostPeriod.all.forEach { option ->
+                            FilterChip(
+                                selected = period == option,
+                                onClick = { period = option },
+                                label = { Text(CostPeriod.label(option)) },
+                                enabled = !saving,
+                            )
+                        }
                     }
                 }
             }
@@ -244,41 +236,28 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                     "Where this subscription is billed, so you know where to cancel or manage it."
                 },
             ) {
-                Box {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(enabled = !saving) { billingExpanded = true }
-                            .padding(horizontal = 16.dp, vertical = 18.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text("Billed through", modifier = Modifier.weight(1f))
-                        Text(
-                            text = billingSource?.label ?: "Not set",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Icon(
-                            Icons.Default.ArrowDropDown,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = billingExpanded,
-                        onDismissRequest = { billingExpanded = false },
-                        shape = RoundedCornerShape(16.dp),
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shadowElevation = 8.dp,
-                        tonalElevation = 0.dp,
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Not set") },
-                            onClick = { billingRaw = null; billingExpanded = false },
+                Column(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        text = "Billed through",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = billingRaw == null,
+                            onClick = { billingRaw = null },
+                            label = { Text("Not set") },
+                            enabled = !saving,
                         )
                         BillingSource.entries.forEach { source ->
-                            DropdownMenuItem(
-                                text = { Text(source.label) },
-                                onClick = { billingRaw = source.raw; billingExpanded = false },
+                            FilterChip(
+                                selected = billingRaw == source.raw,
+                                onClick = { billingRaw = source.raw },
+                                label = { Text(source.label) },
+                                enabled = !saving,
                             )
                         }
                     }
@@ -325,25 +304,24 @@ fun TileFormScreen(existing: Tile?, onDismiss: () -> Unit, onSaved: () -> Unit) 
                                 enabled = !saving,
                             ) { Text("Clear") }
                         }
-                        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                            SegmentedButton(
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            FilterChip(
                                 selected = renewalRepeat == null,
                                 onClick = { renewalRepeat = null },
-                                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                                label = { Text("Never") },
                                 enabled = !saving,
-                            ) { Text("Never") }
-                            SegmentedButton(
-                                selected = renewalRepeat == RenewalRepeat.MONTHLY,
-                                onClick = { renewalRepeat = RenewalRepeat.MONTHLY },
-                                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-                                enabled = !saving,
-                            ) { Text("Monthly") }
-                            SegmentedButton(
-                                selected = renewalRepeat == RenewalRepeat.YEARLY,
-                                onClick = { renewalRepeat = RenewalRepeat.YEARLY },
-                                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-                                enabled = !saving,
-                            ) { Text("Yearly") }
+                            )
+                            RenewalRepeat.all.forEach { option ->
+                                FilterChip(
+                                    selected = renewalRepeat == option,
+                                    onClick = { renewalRepeat = option },
+                                    label = { Text(RenewalRepeat.label(option)) },
+                                    enabled = !saving,
+                                )
+                            }
                         }
                     } else {
                         TextButton(onClick = { showDatePicker = true }, enabled = !saving) {

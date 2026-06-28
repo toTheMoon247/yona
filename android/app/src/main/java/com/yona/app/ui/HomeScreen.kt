@@ -7,6 +7,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -41,6 +43,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -87,6 +92,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onAddClick: () -> Unit,
     onUpgrade: () -> Unit,
+    onShowBreakdown: () -> Unit,
     onTileClick: (Tile) -> Unit,
     onEditTile: (Tile) -> Unit,
     modifier: Modifier = Modifier,
@@ -144,6 +150,7 @@ fun HomeScreen(
                             query = query,
                             sort = sort,
                             onQueryChange = { query = it },
+                            onShowBreakdown = onShowBreakdown,
                             onTileClick = onTileClick,
                             onEditTile = onEditTile,
                             onDeleteTile = { pendingDelete = it },
@@ -191,6 +198,7 @@ private fun LoadedContent(
     query: String,
     sort: TileSort,
     onQueryChange: (String) -> Unit,
+    onShowBreakdown: () -> Unit,
     onTileClick: (Tile) -> Unit,
     onEditTile: (Tile) -> Unit,
     onDeleteTile: (Tile) -> Unit,
@@ -206,7 +214,7 @@ private fun LoadedContent(
         modifier = Modifier.fillMaxSize(),
     ) {
         Column(Modifier.fillMaxSize()) {
-            SpendHeader(tiles)
+            SpendHeader(tiles, onClick = onShowBreakdown)
             SearchField(query = query, onQueryChange = onQueryChange)
             if (sorted.isEmpty()) {
                 NoResults(query)
@@ -218,55 +226,71 @@ private fun LoadedContent(
 }
 
 /**
- * Spend hero: the exact total per year (monthly × 12 + yearly), with the monthly /
- * yearly split and a count per bucket. Computed over all subscriptions. Mirrors iOS.
+ * Spend hero: the exact total across all subscriptions (each annualized), shown per
+ * year or per month via a remembered toggle. The headline taps through to the cost
+ * breakdown. Computed over all subscriptions. Mirrors iOS.
  */
 @Composable
-private fun SpendHeader(tiles: List<Tile>) {
-    val monthlySubs = tiles.filter { it.costPeriod == CostPeriod.MONTHLY && it.costAmount != null }
-    val yearlySubs = tiles.filter { it.costPeriod == CostPeriod.YEARLY && it.costAmount != null }
-    val monthlyTotal = monthlySubs.sumOf { it.costAmount ?: 0.0 }
-    val yearlyTotal = yearlySubs.sumOf { it.costAmount ?: 0.0 }
-    val annualTotal = monthlyTotal * 12 + yearlyTotal
+private fun SpendHeader(tiles: List<Tile>, onClick: () -> Unit) {
+    val annualTotal = tiles.sumOf { it.annualizedCost ?: 0.0 }
     if (annualTotal <= 0.0) return
+
+    var showMonthly by remember { mutableStateOf(Settings.spendShowsMonthly) }
+    val displayTotal = if (showMonthly) annualTotal / 12 else annualTotal
+    val unit = if (showMonthly) " a month" else " a year"
 
     val onSurface = MaterialTheme.colorScheme.onSurface
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
-
-    val buckets = buildList {
-        if (monthlyTotal > 0) add("${formatCurrency(monthlyTotal)}/mo · ${subCount(monthlySubs.size)}")
-        if (yearlyTotal > 0) add("${formatCurrency(yearlyTotal)}/yr · ${subCount(yearlySubs.size)}")
-    }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 8.dp),
     ) {
-        Text(
-            text = "You pay",
-            style = MaterialTheme.typography.bodyMedium,
-            color = onSurfaceVariant,
-        )
-        Text(
-            text = buildAnnotatedString {
-                withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, color = onSurface)) {
-                    append(formatCurrency(annualTotal))
-                }
-                withStyle(SpanStyle(fontSize = 18.sp, color = onSurfaceVariant)) {
-                    append(" a year")
-                }
-            },
-        )
-        Text(
-            text = buckets.joinToString("   ·   "),
-            style = MaterialTheme.typography.bodyMedium,
-            color = onSurfaceVariant,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = "You pay",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = onSurfaceVariant,
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, color = onSurface)) {
+                            append(formatCurrency(displayTotal))
+                        }
+                        withStyle(SpanStyle(fontSize = 18.sp, color = onSurfaceVariant)) {
+                            append(unit)
+                        }
+                    },
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        SingleChoiceSegmentedButtonRow {
+            SegmentedButton(
+                selected = showMonthly,
+                onClick = { showMonthly = true; Settings.spendShowsMonthly = true },
+                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+            ) { Text("Monthly") }
+            SegmentedButton(
+                selected = !showMonthly,
+                onClick = { showMonthly = false; Settings.spendShowsMonthly = false },
+                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            ) { Text("Yearly") }
+        }
     }
 }
-
-private fun subCount(count: Int): String = "$count sub${if (count == 1) "" else "s"}"
 
 /** The Home brand mark: a small 2×2 grid glyph + the full app name (mirrors iOS). */
 @Composable
