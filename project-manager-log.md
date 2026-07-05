@@ -255,3 +255,15 @@ No coding — a few days off.
 **Where we are.** Both apps are full-featured and matching. The iPhone is in testing; Android is awaiting Google verification. Real payments and the public App Store release are on hold pending Apple.
 
 **Next steps.** When Apple approves, finish wiring up payments and submit the iPhone app to the App Store. Separately, get Android into Google Play testing once verified.
+
+---
+
+## Day 16 — 2026-07-06 _(Today)_
+
+**Today.** Made the admin dashboard login simple and reliable.
+
+- Yesterday's email-link login turned out flaky — the links kept coming back "expired." After ruling out the likely causes, we switched the admin login to a plain **email + password** instead. Much simpler and rock-solid, and the sensitive keys still stay inside the backend.
+
+**Where we are.** The admin dashboard now works reliably. Both apps are still full-featured and matching; payments and the App Store release are still on hold pending Apple, and Android is awaiting Google verification.
+
+**Next steps.** Wait on Apple (payments / App Store) and Google (Play verification).
