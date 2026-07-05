@@ -385,11 +385,6 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
-# admin-login runs BEFORE the user has a session (to gate magic-link sends), so it
-# must be callable without a JWT. It does its own allow-list check internally.
-[functions.admin-login]
-verify_jwt = false
-
 [analytics]
 enabled = true
 port = 54327

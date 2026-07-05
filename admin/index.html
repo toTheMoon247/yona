@@ -65,9 +65,10 @@
   <div id="login" class="gate" hidden>
     <div class="card">
       <h2>Admin sign-in</h2>
-      <p>Enter your admin email — we'll send you a one-time magic link.</p>
       <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-      <button id="sendLink">Send magic link</button>
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password"
+             style="margin-top:10px" />
+      <button id="signin">Sign in</button>
       <div id="loginMsg" class="msg"></div>
     </div>
   </div>
@@ -156,24 +157,18 @@
       loadUsers();
     }
 
-    $('sendLink').onclick = async () => {
+    async function signIn() {
       const email = $('email').value.trim();
-      if (!email) return;
-      $('loginMsg').textContent = 'Sending…';
-      try {
-        // Server decides whether to actually send (admins only) and never reveals which
-        // emails are admins — so the message is the same regardless.
-        const res = await fetch(`${cfg.url}/functions/v1/admin-login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.anonKey}` },
-          body: JSON.stringify({ email, redirectTo: window.location.href }),
-        });
-        const out = await res.json();
-        $('loginMsg').textContent = out.message || out.error || 'Something went wrong.';
-      } catch (e) {
-        $('loginMsg').textContent = e.message;
-      }
-    };
+      const password = $('password').value;
+      if (!email || !password) return;
+      $('loginMsg').textContent = 'Signing in…';
+      // Stateless: one request, no redirect/hash/token dance. On success,
+      // onAuthStateChange fires and swaps to the dashboard.
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) $('loginMsg').textContent = error.message;
+    }
+    $('signin').onclick = signIn;
+    $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') signIn(); });
     $('signout').onclick = async () => { await sb.auth.signOut(); };
 
     sb.auth.onAuthStateChange((_e, session) => {
