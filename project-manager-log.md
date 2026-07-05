@@ -181,3 +181,77 @@ Day off — no coding today.
 **Where we are.** Both apps are full-featured, look alike, and share the same data. The iPhone is in friends-and-family testing on TestFlight; Android is ready for its own store testing once the Google account verification finishes. Payments and phone notifications are still intentionally switched off.
 
 **Next steps.** Get Android into Google Play internal testing; later, switch on real payments (the billing service) and Apple push notifications.
+
+---
+
+## Rest day — 2026-06-24
+
+Day off — no coding.
+
+---
+
+## Day 12 — 2026-06-25
+
+**Today.** A quick fix from a tester, plus some planning.
+
+- **Fixed the "all-dark" look.** A friend opened the Android app on a phone set to dark mode and it came out mostly black (some colours weren't designed for a dark background). Made the Android app always use the clean light look, regardless of the phone's setting — matching the iPhone.
+- **Planned the store rollout** — walked through the Google Play steps and what's still waiting (the Google account identity verification).
+
+**Where we are.** Both apps are polished and matching. iPhone is in testing; Android is waiting on Google's verification.
+
+**Next steps (next day).** Act on mum's feedback for the spending screen.
+
+---
+
+## Rest day — 2026-06-26
+
+No coding — planning day (mum's spending-screen ideas and the payments/App-Store approach).
+
+---
+
+## Day 13 — 2026-06-27
+
+**Today.** A round of improvements, mostly from mum trying the app.
+
+- **Switch the total between per-month and per-year** on the home screen.
+- **More billing schedules** — a subscription can now be weekly, every 2 months, quarterly, etc. (mum's building-maintenance bill is every 2 months, which the app couldn't handle before).
+- **Friendlier choices** — replaced the little dropdowns with tap-to-pick "chips" so all the options are visible at a glance.
+- **A new "Spending" breakdown screen** — tap the total to see every subscription sorted by cost, each with its share.
+- Saved this as the iPhone's newest version, and made the upgrade button work for TestFlight testers so they can try beyond the free limit.
+
+**Where we are.** The iPhone has the new spending tools; Android still to catch up.
+
+**Next steps (next day).** Bring Android up to match.
+
+---
+
+## Day 14 — 2026-06-28
+
+**Today.** Android caught up, and a product decision recorded.
+
+- **Android got all the new spending tools** (month/year toggle, flexible schedules, chips, the breakdown screen). Saved as Android's matching version — the two apps are level again.
+- **Decided *not* to build "auto-import your subscriptions from your bank / Netflix login."** It's either insecure (handing us your passwords) or doesn't work for Israeli banks — and typing a subscription in is quick anyway. Wrote the decision down so it's not revisited.
+
+**Where we are.** Both apps full-featured and matching. Payments still off; both stores still pending.
+
+**Next steps (next day).** A short break, then the store/payments setup.
+
+---
+
+## Break — 2026-06-29 → 2026-07-04
+
+No coding — a few days off.
+
+---
+
+## Day 15 — 2026-07-05 _(Today)_
+
+**Today.** Two nice additions, and kicked off the payments path.
+
+- **Easier document attachments.** When adding a document you can now pick straight from **Photos** or **Files** — so attaching a screenshot no longer means saving it into Files first.
+- **A private admin dashboard (for you).** A simple web page to see all your users and each one's subscriptions — behind a secure email magic-link login, with the sensitive keys kept inside the backend, never on your computer.
+- **Started the App-Store payments setup** (via the billing service, RevenueCat) — but **parked it waiting on Apple** to approve the paid-apps agreement (their banking/tax check). Nothing more we can do until Apple comes back.
+
+**Where we are.** Both apps are full-featured and matching. The iPhone is in testing; Android is awaiting Google verification. Real payments and the public App Store release are on hold pending Apple.
+
+**Next steps.** When Apple approves, finish wiring up payments and submit the iPhone app to the App Store. Separately, get Android into Google Play testing once verified.
