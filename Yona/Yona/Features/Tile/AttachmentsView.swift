@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 import UniformTypeIdentifiers
 import QuickLook
 
@@ -17,7 +18,10 @@ struct AttachmentsView: View {
     @Environment(SupabaseRepository.self) private var repository
 
     @State private var attachments: LoadState<[Attachment]> = .idle
+    @State private var showingSourceDialog = false
     @State private var isImporting = false
+    @State private var showingPhotos = false
+    @State private var photoItem: PhotosPickerItem?
     @State private var isUploading = false
     @State private var openingID: UUID?
     @State private var previewURL: URL?
@@ -30,7 +34,7 @@ struct AttachmentsView: View {
             content
 
             Button {
-                isImporting = true
+                showingSourceDialog = true
             } label: {
                 Label("Add document", systemImage: "paperclip")
             }
@@ -55,6 +59,15 @@ struct AttachmentsView: View {
             in: RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous)
         )
         .task { await load() }
+        .confirmationDialog("Add a document", isPresented: $showingSourceDialog, titleVisibility: .visible) {
+            Button("Choose from Photos") { showingPhotos = true }
+            Button("Choose from Files") { isImporting = true }
+        }
+        .photosPicker(isPresented: $showingPhotos, selection: $photoItem, matching: .images)
+        .onChange(of: photoItem) { _, item in
+            guard let item else { return }
+            Task { await uploadPhoto(item) }
+        }
         .fileImporter(
             isPresented: $isImporting,
             allowedContentTypes: [.item],
@@ -181,22 +194,47 @@ struct AttachmentsView: View {
         errorMessage = nil
         let didAccess = url.startAccessingSecurityScopedResource()
         defer { if didAccess { url.stopAccessingSecurityScopedResource() } }
-
         do {
             let data = try Data(contentsOf: url)
-            guard data.count <= 25 * 1024 * 1024 else {
-                errorMessage = "That file is over 25 MB."
+            let mime = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType
+            await upload(data: data, filename: url.lastPathComponent, contentType: mime)
+        } catch {
+            errorMessage = "Couldn't read that file."
+        }
+    }
+
+    private func uploadPhoto(_ item: PhotosPickerItem) async {
+        errorMessage = nil
+        defer { photoItem = nil }
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self) else {
+                errorMessage = "Couldn't read that photo."
                 return
             }
-            isUploading = true
-            defer { isUploading = false }
+            let type = item.supportedContentTypes.first
+            let ext = type?.preferredFilenameExtension ?? "jpg"
+            let mime = type?.preferredMIMEType ?? "image/jpeg"
+            let filename = "Photo-\(Self.photoNameFormatter.string(from: Date())).\(ext)"
+            await upload(data: data, filename: filename, contentType: mime)
+        } catch {
+            errorMessage = "Couldn't read that photo."
+        }
+    }
 
-            let mime = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType
+    /// Core upload shared by the Files and Photos paths (with the 25 MB cap).
+    private func upload(data: Data, filename: String, contentType: String?) async {
+        guard data.count <= 25 * 1024 * 1024 else {
+            errorMessage = "That file is over 25 MB."
+            return
+        }
+        isUploading = true
+        defer { isUploading = false }
+        do {
             let attachment = try await repository.uploadAttachment(
                 tileID: tileID,
                 data: data,
-                filename: url.lastPathComponent,
-                contentType: mime
+                filename: filename,
+                contentType: contentType
             )
             var current = attachments.value ?? []
             current.insert(attachment, at: 0)
@@ -211,4 +249,11 @@ struct AttachmentsView: View {
             #endif
         }
     }
+
+    private static let photoNameFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        return formatter
+    }()
 }
