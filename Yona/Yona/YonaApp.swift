@@ -4,6 +4,7 @@
 //
 
 import SwiftUI
+import RevenueCat
 
 @main
 struct YonaApp: App {
@@ -15,6 +16,17 @@ struct YonaApp: App {
     init() {
         // Roomier on-disk image cache so brand logos persist across launches.
         URLCache.shared = URLCache(memoryCapacity: 25_000_000, diskCapacity: 100_000_000)
+
+        // RevenueCat: configure before any entitlement/purchase call. Uses the Test
+        // Store key for now — swap for the production `appl_…` key before App Store release.
+        #if DEBUG
+        Purchases.logLevel = .debug
+        #endif
+        Purchases.configure(
+            with: Configuration.Builder(withAPIKey: "test_TrdiFeEWZrOeXGhPPOQMSGmTgFb")
+                .with(storeKitVersion: .storeKit2)
+                .build()
+        )
 
         let repository = SupabaseRepository()
         _repository = State(initialValue: repository)
@@ -29,6 +41,8 @@ struct YonaApp: App {
                 .environment(auth)
                 .environment(tiles)
                 .environment(entitlement)
+                // Start observing entitlement changes once, on the main actor.
+                .task { entitlement.start() }
         }
     }
 }

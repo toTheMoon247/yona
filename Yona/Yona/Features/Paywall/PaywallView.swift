@@ -3,8 +3,8 @@
 //  Yona
 //
 //  Shown when a free user tries to add a tile past the free limit (or taps Upgrade).
-//  Prices/plans are placeholders until RevenueCat + store products are configured;
-//  the purchase action is a DEBUG dev-unlock for now and becomes a real purchase later.
+//  One-time unlock (no subscription). Price, purchase, and restore are driven by
+//  RevenueCat via EntitlementStore; the sheet dismisses itself once Premium is active.
 //
 
 import SwiftUI
@@ -13,23 +13,23 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(EntitlementStore.self) private var entitlement
 
-    enum Plan: Hashable { case yearly, lifetime }
-    @State private var selectedPlan: Plan = .yearly
-
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: DesignTokens.Spacing.l) {
                     header
                     benefits
-                    plans
+                    priceCard
                     purchaseButton
-                    Button("Restore Purchases") { /* TODO: RevenueCat restore */ }
-                        .font(.footnote)
+                    Button("Restore Purchases") {
+                        Task { await entitlement.restore() }
+                    }
+                    .font(.footnote)
+                    .disabled(entitlement.isPurchasing)
 
                     Text(
                         "Yona is free for up to \(entitlement.freeTileLimit) subscriptions. " +
-                        "Premium adds unlimited subscriptions. Cancel anytime."
+                        "Premium removes the limit — one payment, no recurring charge."
                     )
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -40,7 +40,18 @@ struct PaywallView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Not now") { dismiss() }
+                        .disabled(entitlement.isPurchasing)
                 }
+            }
+            // RevenueCat grants the entitlement asynchronously — dismiss once it lands
+            // (covers purchase, restore, and unlocks synced from another device).
+            .onChange(of: entitlement.isPremium) { _, isPremium in
+                if isPremium { dismiss() }
+            }
+            .alert("Purchase failed", isPresented: errorBinding) {
+                Button("OK", role: .cancel) { entitlement.purchaseError = nil }
+            } message: {
+                Text(entitlement.purchaseError ?? "")
             }
         }
     }
@@ -52,7 +63,7 @@ struct PaywallView: View {
                 .foregroundStyle(.tint)
             Text("Yona Premium")
                 .font(.largeTitle.bold())
-            Text("Track unlimited subscriptions")
+            Text("One payment. Unlock everything.")
                 .font(.headline)
                 .foregroundStyle(.secondary)
         }
@@ -61,7 +72,7 @@ struct PaywallView: View {
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.s) {
-            benefitRow("infinity", "Unlimited subscriptions (free includes \(entitlement.freeTileLimit))")
+            benefitRow("infinity", "Track as many subscriptions as you want")
             benefitRow("checkmark.seal.fill", "Everything in the free version — logos, costs, renewals, documents")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -75,59 +86,46 @@ struct PaywallView: View {
         }
     }
 
-    private var plans: some View {
-        VStack(spacing: DesignTokens.Spacing.m) {
-            planCard(.yearly, title: "Yearly", price: "$1.99 / year", note: "Billed annually")
-            planCard(.lifetime, title: "Lifetime", price: "$4.99 once", note: "Pay once, yours forever")
+    private var priceCard: some View {
+        VStack(spacing: 2) {
+            // Real localized price from the store, or a placeholder while the offering loads.
+            Text(entitlement.priceText ?? "—")
+                .font(.largeTitle.bold())
+                .redacted(reason: entitlement.priceText == nil ? .placeholder : [])
+            Text("One-time purchase · no recurring charge")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
-    }
-
-    private func planCard(_ plan: Plan, title: String, price: String, note: String) -> some View {
-        let selected = selectedPlan == plan
-        return Button {
-            selectedPlan = plan
-        } label: {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.headline)
-                    Text(note).font(.caption).foregroundStyle(.secondary)
-                }
-                Spacer()
-                Text(price).font(.headline)
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous)
-                    .fill(selected ? Color.accentColor.opacity(0.12) : Color(.secondarySystemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous)
-                    .strokeBorder(selected ? Color.accentColor : .clear, lineWidth: 2)
-            )
-        }
-        .buttonStyle(.plain)
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.Radius.control, style: .continuous)
+                .fill(Color.accentColor.opacity(0.12))
+        )
     }
 
     private var purchaseButton: some View {
         Button {
-            purchase()
+            Task { await entitlement.purchase() }
         } label: {
-            Text(selectedPlan == .lifetime ? "Unlock Lifetime" : "Start Yearly")
-                .frame(maxWidth: .infinity)
+            HStack(spacing: DesignTokens.Spacing.s) {
+                if entitlement.isPurchasing {
+                    ProgressView().tint(.white)
+                }
+                Text("Unlock Everything")
+            }
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
+        .disabled(entitlement.isPurchasing || entitlement.unlockPackage == nil)
     }
 
-    private func purchase() {
-        if AppBuild.usesMockPurchases {
-            // Mock unlock in Debug + TestFlight so testers can go past the free limit.
-            // App Store production falls through to the real purchase path below.
-            entitlement.setDevPremium(true)
-            dismiss()
-        } else {
-            // TODO: real purchase via RevenueCat (selectedPlan).
-        }
+    /// Bridges `entitlement.purchaseError` (a `String?`) to the alert's `isPresented` Bool.
+    private var errorBinding: Binding<Bool> {
+        Binding(
+            get: { entitlement.purchaseError != nil },
+            set: { if !$0 { entitlement.purchaseError = nil } }
+        )
     }
 }

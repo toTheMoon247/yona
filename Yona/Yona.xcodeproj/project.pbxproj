@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0E316BB12FDAB8F200E0D195 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0E316BB02FDAB8F200E0D195 /* Supabase */; };
+		0EC18657300B17460091B182 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 0EC18656300B17460091B182 /* RevenueCat */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0EC18657300B17460091B182 /* RevenueCat in Frameworks */,
 				0E316BB12FDAB8F200E0D195 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -126,6 +128,7 @@
 			name = Yona;
 			packageProductDependencies = (
 				0E316BB02FDAB8F200E0D195 /* Supabase */,
+				0EC18656300B17460091B182 /* RevenueCat */,
 			);
 			productName = Yona;
 			productReference = 0E316B732FDAB0A700E0D195 /* Yona.app */;
@@ -211,6 +214,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0E316B9D2FDAB44300E0D195 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				0EC18655300B17460091B182 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0E316B742FDAB0A700E0D195 /* Products */;
@@ -605,6 +609,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		0EC18655300B17460091B182 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.81.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -612,6 +624,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0E316B9D2FDAB44300E0D195 /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		0EC18656300B17460091B182 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0EC18655300B17460091B182 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
