@@ -17,13 +17,17 @@ struct YonaApp: App {
         // Roomier on-disk image cache so brand logos persist across launches.
         URLCache.shared = URLCache(memoryCapacity: 25_000_000, diskCapacity: 100_000_000)
 
-        // RevenueCat: configure before any entitlement/purchase call. Uses the Test
-        // Store key for now — swap for the production `appl_…` key before App Store release.
+        // RevenueCat public SDK key. Debug/simulator uses the Test Store (instant fake
+        // purchases, no sandbox account needed); Release — TestFlight and the App Store —
+        // uses the real App Store key so purchases run through StoreKit (sandbox on TestFlight).
         #if DEBUG
         Purchases.logLevel = .debug
+        let revenueCatKey = "test_TrdiFeEWZrOeXGhPPOQMSGmTgFb"
+        #else
+        let revenueCatKey = "appl_HYjZPwSORjDowXTDRTYDvwRsLaF"
         #endif
         Purchases.configure(
-            with: Configuration.Builder(withAPIKey: "test_TrdiFeEWZrOeXGhPPOQMSGmTgFb")
+            with: Configuration.Builder(withAPIKey: revenueCatKey)
                 .with(storeKitVersion: .storeKit2)
                 .build()
         )
