@@ -267,3 +267,26 @@ No coding — a few days off.
 **Where we are.** The admin dashboard now works reliably. Both apps are still full-featured and matching; payments and the App Store release are still on hold pending Apple, and Android is awaiting Google verification.
 
 **Next steps.** Wait on Apple (payments / App Store) and Google (Play verification).
+
+---
+
+## Break — 2026-07-07 → 2026-07-17
+
+No coding — waiting on Apple to approve the paid-apps agreement (their banking/tax check), which had to clear before payments and an App Store submission could move.
+
+---
+
+## Day 17 — 2026-07-18 → 2026-07-20 _(Today)_
+
+**Today.** Apple approved payments — so we finished wiring up the real purchase and **submitted the iPhone app to the App Store.** This was the big launch push, spread over a few sessions.
+
+- **Real payments are on.** The upgrade is now a genuine purchase, not a placeholder. "Yona Premium" is a **one-time unlock (no subscription)** — pay once, keep it forever — that removes the free limit of 4 subscriptions. Connected the app to the billing service (RevenueCat) and the real App Store product, so buying it unlocks everything and "Restore Purchases" works across devices. A developer-only test shortcut stays in for us but never ships to real users.
+- **Simplified the upgrade screen** to a single clear one-time price ($5.99), instead of the old two-option (yearly / lifetime) choice.
+- **Got everything the App Store demands ready:** a published **privacy-policy page** and a **support page** (both live online), **app screenshots** (captured on the latest iPhone), the store description, keywords, category (Finance), age rating, and Apple's **data-privacy questionnaire**.
+- **Made the first release iPhone-only** (native iPad support can come later) — which also meant no separate iPad screenshots were needed.
+- **Submitted the app — with the paid unlock included — to Apple for review.** It's set to **release automatically the moment it's approved.**
+- **Chased down a scare that turned out to be nothing.** Google sign-in failed inside the iPhone *simulator* (a "localhost" error). We verified carefully that it's only the simulator — the real app on real phones and TestFlight works fine — so there was nothing to fix and we changed no settings.
+
+**Where we are.** The iPhone app is **submitted to the App Store and waiting on Apple's review** (usually a day or two); once approved it goes live on its own. Payments are fully working. Android is still full-featured and matching, waiting on Google's account verification.
+
+**Next steps.** Wait for Apple's review result — if they come back with questions, respond and resubmit. Then get Android into Google Play testing. (Minor housekeeping for later: tidy a leftover development web address in the login settings.)
