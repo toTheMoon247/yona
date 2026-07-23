@@ -290,3 +290,11 @@ No coding — waiting on Apple to approve the paid-apps agreement (their banking
 **Where we are.** The iPhone app is **submitted to the App Store and waiting on Apple's review** (usually a day or two); once approved it goes live on its own. Payments are fully working. Android is still full-featured and matching, waiting on Google's account verification.
 
 **Next steps.** Wait for Apple's review result — if they come back with questions, respond and resubmit. Then get Android into Google Play testing. (Minor housekeeping for later: tidy a leftover development web address in the login settings.)
+
+---
+
+## Status check — 2026-07-23
+
+No coding — just checked on Apple. The app has been **"Waiting for Review"** since it was submitted on **2026-07-20, ~3 PM** (US Central time) — about **69 hours** in Apple's queue. That's a touch longer than the usual 24–48h but well within normal, especially for a first submission; there's **no rejection and nothing flagged** in the Resolution Center, so it's simply queued. Nothing to do but wait — and specifically *not* to withdraw/resubmit (that resets the place in line).
+
+**Next steps.** Let it sit. If it's still "Waiting for Review" by roughly **2026-07-26**, nudge Apple (App Store Connect → Contact Us → App Review status). Otherwise watch for it to flip to "In Review," then a decision.
