@@ -298,3 +298,11 @@ No coding — waiting on Apple to approve the paid-apps agreement (their banking
 No coding — just checked on Apple. The app has been **"Waiting for Review"** since it was submitted on **2026-07-20, ~3 PM** (US Central time) — about **69 hours** in Apple's queue. That's a touch longer than the usual 24–48h but well within normal, especially for a first submission; there's **no rejection and nothing flagged** in the Resolution Center, so it's simply queued. Nothing to do but wait — and specifically *not* to withdraw/resubmit (that resets the place in line).
 
 **Next steps.** Let it sit. If it's still "Waiting for Review" by roughly **2026-07-26**, nudge Apple (App Store Connect → Contact Us → App Review status). Otherwise watch for it to flip to "In Review," then a decision.
+
+---
+
+## Status check — 2026-07-30
+
+Still **"Waiting for Review"** (~10 days). Likely the wider 2026 Apple review backlog, not an app issue — no rejection, nothing flagged. Sent App Review a status inquiry asking for an ETA — **Case ID 20000123366072**.
+
+**Next steps.** Wait for Apple's reply or an "In Review" flip. Not resubmitting; expedited held in reserve (no time-critical reason).
