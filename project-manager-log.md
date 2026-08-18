@@ -306,3 +306,11 @@ No coding — just checked on Apple. The app has been **"Waiting for Review"** s
 Still **"Waiting for Review"** (~10 days). Likely the wider 2026 Apple review backlog, not an app issue — no rejection, nothing flagged. Sent App Review a status inquiry asking for an ETA — **Case ID 20000123366072**.
 
 **Next steps.** Wait for Apple's reply or an "In Review" flip. Not resubmitting; expedited held in reserve (no time-critical reason).
+
+---
+
+## Rejection → fix → resubmit — 2026-08-18
+
+Apple reviewed on Jul 30 and **rejected** (Guideline 2.1(a), App Completeness): "Continue with Apple" login errored. Root cause: the **Supabase free-tier project auto-paused** after 7 idle days, so the backend was down when the reviewer tried to log in. Unpaused it, verified Apple login works end-to-end, replied to App Review explaining the transient outage, and **resubmitted build 10** (no code change needed). App + IAP are back to "Waiting for Review."
+
+**Watch-out.** Free tier re-pauses after 7 idle days and reviews run long — Supabase must stay awake for the whole review window or it'll reject again. (Declined the free auto-ping for now; keeping it alive manually.)
